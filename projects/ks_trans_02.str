@@ -1,0 +1,83 @@
+/*
+@title kh_trance_02
+@by kahlys
+*/
+
+register('o', (orbit, pat) => pat.orbit(orbit))
+register('fill', function (pat) {
+  return new Pattern(function (state) {
+    const lookbothways = 1;
+    // Expand the query window
+    const haps = pat.query(state.withSpan(span => new TimeSpan(span.begin.sub(lookbothways), span.end.add(lookbothways))));
+    const onsets = haps.map(hap => hap.whole.begin)
+      // sort fractions
+      .sort((a, b) => a.compare(b))
+      // make unique
+      .filter((x, i, arr) => i == (arr.length - 1) || x.ne(arr[i + 1]));
+    const newHaps = [];
+    for (const hap of haps) {
+      // Ingore if the part starts after the original query
+      if (hap.part.begin.gte(state.span.end)) {
+        continue;
+      }
+
+      // Find the next onset, to use as an offset
+      const next = onsets.find(onset => onset.gte(hap.whole.end));
+
+      // Ignore if the part ended before the original query, and hasn't expanded inside
+      if (next.lte(state.span.begin)) {
+        continue;
+      }
+
+      const whole = new TimeSpan(hap.whole.begin, next);
+      // Constrain part to original query
+      const part = new TimeSpan(hap.part.begin.max(state.span.begin), next.min(state.span.end));
+      newHaps.push(new Hap(whole, part, hap.value, hap.context, hap.stateful));
+    }
+    return newHaps;
+  });
+});
+register('trancegate', (density, seed, length, x) => {
+  return x.struct(rand.mul(density).round().seg(16).rib(seed, length)).fill().clip(.7)
+})
+register('rlpf', (x, pat) => { return pat.lpf(pure(x).mul(12).pow(4)) })
+register('acidenv', (x, pat) => pat.rlpf(.25).lpenv(x * 9).lps(.2).lpd(.15))
+
+setCpm(140/4)
+
+// KICK
+$: s("tr909_bd:4").beat("0,4,8,12", 16)._scope()
+// CLAP
+$: s("tr808_cp:1").beat("4,12",16).speed("<1 1 1 1.2>*2")
+  .room(.5).gain(rand.range(.4, .8))._punchcard()
+
+// HH
+$: s("tr808_sh:2!16").gain(rand.range(.1, .3)).degradeBy(.1).rib(2,8)
+
+// BASS 1
+_$: n("<0 [0@5 <2 -1>@3]>".add("-14, -7")).scale("g:minor").s("supersaw")
+ .trancegate(1.5, 1, 2)
+ .seg(16).gain("[.2 .9]*4")
+ .rlpf(slider(0.766)).lpe(2)
+
+// BASS 2
+$: n("0@2 <5 [3 7] <4 -1>>".add("-14, -7")).scale("g:minor").s("supersaw")
+  .trancegate(1.5, 1, 2)
+  .seg(16).gain("[.2 .9]*4")
+  .rlpf(slider(0.836)).lpe(2)
+
+// ARP 1
+_$: n("<0 1>*2 4 [0 6]@2 <<7 5> 3>".add("<0@2 -1 3>")).scale("g:minor")
+  .euclid(10,16)
+  .s("sawtooth")
+  .delay(.7).pan(rand)
+  .rlpf(slider(0.315)).lpe(2)
+
+// ARP 2
+$: n("<0 1>*2 4 [0 6]@2 <<7 5> 3>".add("<0@2 -1 3> <0@2 <1 [7 5]*2 <[7 6] 4>>>")).scale("g:minor")
+  .s("supersaw")
+  .trancegate(1.5, 1, 2)
+  .delay(.7).pan(rand)
+  .rlpf(slider(0.69)).lpe(2)._pianoroll()
+
+$: s("gm_lead_6_voice:8").note("d5, bb5").gain(.6).delay(.6).euclid(3,32).slow(2).gain(rand.range(.4, .8))
