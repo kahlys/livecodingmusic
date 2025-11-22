@@ -56,6 +56,7 @@
 |juxtapose|`n("0 2 4 6").scale("C:minor").jux(rev)`|
 |add interval|`n("0 2 4 6".add("<0 1 2 1>")).scale("C:minor")`|
 |repeat each event x times|`s("bd sd").ply("<1 2 3>")`|
+|samples the pattern at a rate of n events per cycle|`note("e3").sound("sawtooth").seg(16)`|
 
 ### Tools
 
