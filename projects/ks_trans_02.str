@@ -79,5 +79,4 @@ $: n("<0 1>*2 4 [0 6]@2 <<7 5> 3>".add("<0@2 -1 3> <0@2 <1 [7 5]*2 <[7 6] 4>>>")
   .trancegate(1.5, 1, 2)
   .delay(.7).pan(rand)
   .rlpf(slider(0.69)).lpe(2)._pianoroll()
-
-$: s("gm_lead_6_voice:8").note("d5, bb5").gain(.6).delay(.6).euclid(3,32).slow(2).gain(rand.range(.4, .8))
+$: s("gm_lead_6_voice").note("[d5, bb5] - - - - -").euclid(3,32).slow(2).delay(.6).gain(rand.range(.4, .9))
