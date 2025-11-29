@@ -1,0 +1,16 @@
+samples('github:tidalcycles/uzu-drumkit')
+
+$: n("<0 4 0 <5 9> 7 0 3 0 5 0 4 6>*8".add("<7 _ _ 6 5 _ _ 6>*2"))
+  .scale("g:minor").trans(-12)
+  .s("sawtooth").orbit(2)
+  .detune(rand).delay(slider(0.8))._pianoroll()
+
+$: n("0*16".add("<7 _ _ 6 <5 3> _ _ <6 4>>*2"))
+  .scale("g:minor").trans(-24)
+  .s("supersaw").orbit(3)
+  .pan(rand)
+  .detune(rand)
+
+$: s("bd").n(1).beat("0,4,8,12",16).duck("2:3").duckdepth(2)._scope()
+$: s("cajon").n("2").beat("4,9?,11,14", 16)
+$: s("sh!16").gain(rand.range(.4, .8)).degradeBy(.3).rib(4,8)
