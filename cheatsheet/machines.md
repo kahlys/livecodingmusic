@@ -1,6 +1,6 @@
 # Machines patterns
 
-## Massiva Attack
+## Massive Attack
 
 ```js
 $: s("bd").beat("0,2",16)
