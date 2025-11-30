@@ -1,0 +1,22 @@
+await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();
+samples('github:switchangel/pad')
+
+setCpm(140/4)
+
+$: n("[0,4,9] [0,5,9]").scale("g:minor").transpose(12).slow(8).sound("gm_fx_echoes")
+  .delay(.8)
+  .gain(.4).orbit(3)
+
+$: s("swpad:3").n("<0 2 5 3>*2").scrub(rand.seg(16).degradeBy(.2).rib(2,3)).gain(1.2)._punchcard()
+
+_$: n("[0 4 <5 3> <6 4>?]").scale("g:minor").sound("sawtooth").legato(0.5).delay(.7).trancegate(1.5,45,1)
+.rlpf(.7).lpenv(2).gain(.9)._pianoroll()
+
+$: n("0".add("-14")).scale("g:minor").s("supersaw").seg(16).trancegate(1.5,45,1).orbit(2).delay(.7).pan(rand)
+  .fm(.7).fmwave("noise").rlpf(slider(0.799)).lpe(2).gain(1.2)
+
+$: stack(
+  s("tr808_sh:1!16").gain(rand.range(.2, .5)).degradeBy(.1).rib(2,8),
+  s("tr909_cp:1").gain(.8).euclid(3,16).slow(2),
+  s("tr909_bd:4").beat("0,4,8,12", 16).duck("2:3").duckattack(.2).duckdepth(.9)
+)._scope()
