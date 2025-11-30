@@ -1,10 +1,14 @@
-register('o', (orbit, pat) => pat.orbit(orbit))
-samples('http://localhost:5432')
-setCpm(140 / 4)
+// Strudel Prebake Script by Switch Angel
+// to use live, load this script in Strudel settings > Prebake Script
+// or add 'await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();'
+
+// tb303 style filter envelope control between 0 & 1 values for useful range
+register('acidenv', (x, pat) => pat.lpf(100)
+  .lpenv(x * 9).lps(.2).lpd(.12).lpq(2)
+)
 
 setGainCurve(x => Math.pow(x, 2))
 
-// setGainCurve(x => x**2)
 function blockArrange(patArr, modifiers = []) {
   return stack(
     ...patArr.map(([pat, maskPat]) => {
@@ -87,6 +91,11 @@ register('trancegate', (density, seed, length, x) => {
   return x.struct(rand.mul(density).round().seg(16).rib(seed, length)).fill().clip(.7)
 })
 
+register('colorparty', (p, pat) => {
+  const colors = ['blue', 'yellow', 'violet', 'green', 'orange', 'cyan', 'magenta', 'white']
+  return pat.color(colors.at(Math.floor(p * colors.length)))
+})
+
 // quantize notes to given values: pat.grab("e:f#:c")
 register('grab', function (scale, pat) {
   // Supports ':' list syntax in mininotation
@@ -137,6 +146,13 @@ register('rlpf', (x, pat) => { return pat.lpf(pure(x).mul(12).pow(4)) })
 //hpf between 0 and 1
 register('rhpf', (x, pat) => { return pat.hpf(pure(x).mul(12).pow(4)) })
 
+//@title velocity structure @by Switch Angel
+register('vstruct', (ipat, pat) => {
+  return ipat.outerBind(vel => {
+    return pat.keepif.out(Math.ceil(vel)).velocity(vel)
+  })
+}, false)
+
 // sets my vocoder CC key to the specified value, probably only useful for me
 register('voc', (key, x) => {
   let value;
@@ -159,18 +175,16 @@ register('voc', (key, x) => {
 
   return x.ccn(74).ccv(value).midi('tout');
 });
-// tb303 style filter envelope control between 0 & 1 values for useful range
-register('acidenv', (x, pat) => pat.rlpf(.25).lpenv(x * 9).lps(.2).lpd(.15))
 
-/** SOUNDS */
-
-register('acid', (pat) => {
-  return pat.s('supersaw')
-    .detune(.5)
-    .unison(1)
-    .lpf(100)
-    .lpsustain(0.2).lpd(.2).lpenv(2)
-    .lpq(12)
+register('fmtime', (start, length, pat) => {
+  let modu = time.mod(length).add(start)
+  return pat.fm(modu).fmh(modu)
 })
 
-$: s("white").clip(0).gain(0)
+window.irando = (ipat) => reify(ipat).fmap(_irand).outerJoin()
+
+window.randm = (division) => irand(division).div(16)
+window.pk = function (...args) {
+  const control = args.length > 2 ? args.pop() : 0
+  return pick(args, control)
+}
