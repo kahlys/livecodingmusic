@@ -9,8 +9,16 @@ $: n("[0,4,9] [0,5,9]").scale("g:minor").transpose(12).slow(8).sound("gm_fx_echo
 
 $: s("swpad:3").n("<0 2 5 3>*2").scrub(rand.seg(16).degradeBy(.2).rib(2,3)).gain(1.2)._punchcard()
 
-_$: n("[0 4 <5 3> <6 4>?]").scale("g:minor").sound("sawtooth").legato(0.5).delay(.7).trancegate(1.5,45,1)
-.rlpf(.7).lpenv(2).gain(.9)._pianoroll()
+// "0@2 [<-5 -2> -7]@3 <-3 0 2 1>@3"
+$: n("0@2 [-5 <-7 -3>]@3 2@3".add(7).add("<0 6 <4 2> <5 3>>")).scale("g:minor")
+  .sound("sine")
+  .delay(.7)
+  .trancegate(1.5,45,1)
+  .rlpf(slider(0.862)).lpenv(2)
+  .degradeBy(.2)
+  .fm(slider(0.711)).fmwave("saw")
+  .gain(.9)
+  ._pianoroll()
 
 $: n("0".add("-14")).scale("g:minor").s("supersaw").seg(16).trancegate(1.5,45,1).orbit(2).delay(.7).pan(rand)
   .fm(.7).fmwave("noise").rlpf(slider(0.799)).lpe(2).gain(1.2)
