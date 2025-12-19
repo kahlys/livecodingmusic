@@ -20,3 +20,8 @@ Using the almostNever function, it will almost never trigger an event. The ply p
 **Raiser**
 
 - `s("pulse!8").fm(time).fmh(time).room(1).gain(.6)`
+
+## Generator
+
+- Random arp using irand: `n(irand(8)).scale('C4:minor').s("supersaw").segment(8).rib(4,2)`
+- Random arp using scramble: `note("0 2 -1 4").scale('C4:minor').sound("sawtooth")`
