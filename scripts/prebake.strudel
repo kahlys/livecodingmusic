@@ -1,6 +1,3 @@
-// Strudel Prebake Script by Switch Angel
-// to use live, load this script in Strudel settings > Prebake Script
-// or add 'await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();'
 
 // tb303 style filter envelope control between 0 & 1 values for useful range
 register('acidenv', (x, pat) => pat.lpf(100)
@@ -9,7 +6,93 @@ register('acidenv', (x, pat) => pat.lpf(100)
 
 setGainCurve(x => Math.pow(x, 2))
 
-function blockArrange(patArr, modifiers = []) {
+
+//tracker style arrangement
+window.track = function (...input) {
+  const patterns = input.shift()
+  let mods = Array.isArray(input.at(-1)) ? input.pop() : undefined
+  if (input.length % 2 !== 0) {
+    throw new Error('Arrange needs a length paramter for each pattern (length, pattern, length, pattern)');
+  }
+  let sects = [];
+  let total = 0;
+  for (let i = 0; i < input.length; i += 2) {
+    let inp = [input.at(i)].flat()
+    let cycles = inp.at(0);
+    let start = inp.at(1) ?? 0
+
+    total += cycles;
+
+    let cpat = input.at(i + 1).innerBind((str, pat) => {
+
+      const pats = []
+      str.split(/-+/).forEach((val, index) => {
+        if (val == false) {
+          return
+        }
+        let newPat = patterns.at(index)
+        mods?.forEach(([mod, callback]) => {
+          if (val != mod) {
+            return
+          }
+          newPat = callback(newPat)
+        })
+
+        pats.push(newPat)
+      })
+      return stack(...pats)
+    });
+
+    sects.push([cycles, cpat.ribbon(start, cycles).fast(cycles)]);
+  }
+  return stepcat(...sects).slow(total);
+}
+/**
+$: track(
+   [bd,     sd,     hat,    clap,    bass], 
+ 2, "--------0------1-------1--------0",
+ 2, "1-------0------1-------D--------0",
+ 4, "1-------0------1-------1--------1",
+  [['D' ,(x) => x.delay(.5)]] //Optional modifiers
+)
+*/
+
+
+/**
+ * Quick Arrange
+ * Allows to arrange multiple patterns together over multiple cycles.
+ * Takes a variable number of arrays with two elements specifying the number of cycles and the pattern to use.
+ *
+ * @return {Pattern}
+ * @example
+ * ar(
+ *   4, "<c a f e>(3,8)",
+ *   2, "<g a>(5,8)"
+ * ).note()
+ */
+window.ar = function (...input) {
+
+  if (input.length % 2 !== 0) {
+    throw new Error('Arrange needs a length paramter for each pattern (length, pattern, length, pattern)');
+  }
+  let sects = [];
+  let total = 0;
+  for (let i = 0; i < input.length; i += 2) {
+    let inp = [input.at(i)].flat()
+    let cycles = inp.at(0);
+    let start = inp.at(1) ?? 0
+    total += cycles;
+
+    let pattern = input.at(i + 1);
+    sects.push([cycles, pattern.ribbon(start, cycles).fast(cycles)]);
+  }
+  return stepcat(...sects).slow(total);
+}
+
+
+window.p = stack
+
+window.blockArrange = function (patArr, modifiers = []) {
   return stack(
     ...patArr.map(([pat, maskPat]) => {
       pat = [pat].flat()
@@ -153,27 +236,27 @@ register('vstruct', (ipat, pat) => {
   })
 }, false)
 
-// sets my vocoder CC key to the specified value, probably only useful for me
+// sets my Ableton vocoder CC key to the specified value, probably only useful for me
+
 register('voc', (key, x) => {
   let value;
-
-  switch (key) {
-    case 'f#': value = 0; break;
-    case 'g': value = 0.1; break;
-    case 'g#': value = 0.2; break;
-    case 'a': value = 0.3; break;
-    case 'a#': value = 0.4; break;
-    case 'b': value = 0.45; break;
-    case 'c': value = 0.5; break;
-    case 'c#': value = 0.6; break;
-    case 'd': value = 0.7; break;
-    case 'd#': value = 0.8; break;
-    case 'e': value = 0.9; break;
-    case 'f': value = 1; break;
-    default: value = 0.5; // fallback value if key is not recognized
+  switch (key.toLowerCase()) {
+    case 'c': value = 0; break;
+    case 'c#': value = 0.2; break;
+    case 'd': value = 0.25; break;
+    case 'd#': value = 0.3; break;
+    case 'e': value = 0.4; break;
+    case 'f': value = 0.5; break;
+    case 'f#': value = 0.6; break;
+    case 'g': value = 0.7; break;
+    case 'g#': value = 0.75; break;
+    case 'a': value = 0.8; break;
+    case 'a#': value = 0.9; break;
+    case 'b': value = 1; break;
+    default: value = 0; // fallback value if key is not recognized
   }
 
-  return x.ccn(74).ccv(value).midi('tout');
+  return x.ccn(34).ccv(value).midi('tout');
 });
 
 register('fmtime', (start, length, pat) => {
@@ -188,3 +271,171 @@ window.pk = function (...args) {
   const control = args.length > 2 ? args.pop() : 0
   return pick(args, control)
 }
+
+
+register('acid', (pat) => {
+  return pat.s('supersaw')
+    .detune(.5)
+    .unison(1)
+    .lpf(100)
+    .lpsustain(0.2).lpd(.2).lpenv(2)
+    .lpq(12)
+})
+
+//stext
+//transform text input into synthesis!
+register('stxt', (text, pat) => {
+  const RANGE = 'range'
+  const SELECTION = 'selection'
+
+  const params = {
+    lpf: {
+      type: RANGE,
+      val: [100, 3000]
+    },
+    room: {
+      type: RANGE,
+      val: [0, 1]
+    },
+    vib: {
+      type: RANGE,
+      val: [0, 16]
+    },
+    vibmod: {
+      type: RANGE,
+      val: [0, .3]
+    },
+    wt: {
+      type: RANGE,
+      val: [0, 1]
+    },
+    note: {
+      type: RANGE,
+      transform: x => Math.round(x),
+      val: [-12, 8]
+    },
+
+    wtrate: {
+      type: RANGE,
+      val: [0, 3]
+    },
+    wtdepth: {
+      type: RANGE,
+      val: [0, 1]
+    },
+
+    delay: {
+      type: RANGE,
+      val: [0, 1]
+    },
+
+
+    delaytime: {
+      type: RANGE,
+      val: [0, .66]
+    },
+
+
+    delayfeedback: {
+      type: RANGE,
+      val: [0, .6]
+    },
+
+    decay: {
+      type: RANGE,
+      val: [.1, 1]
+    },
+
+    attack: {
+      type: RANGE,
+      val: [0, .1]
+    },
+
+    wtrate: {
+      type: RANGE,
+      val: [0, 5]
+    },
+
+    lpenv: {
+      type: RANGE,
+      val: [0, 8]
+    },
+
+    lpd: {
+      type: RANGE,
+      val: [0, 1]
+    },
+
+    lpa: {
+      type: RANGE,
+      val: [0, .5]
+    },
+
+    detune: {
+      type: RANGE,
+      val: [0, .8]
+    },
+
+
+
+    // penv: {
+    //   type: RANGE,
+    //   transform: x => Math.round(x),
+    //   val: [0, 48]
+    // },
+    // pdec: {
+    //   type: RANGE,
+    //   val: [0, .1]
+    // },
+
+
+    s: {
+      type: SELECTION,
+      val: [
+        'sawtooth',
+        'supersaw',
+        'wt_digital',
+        'wt_digital_bad_day',
+        'wt_digital_basique',
+        'wt_digital_echoes',
+        'sine',
+        'triangle',
+        'pulse'
+      ]
+    }
+  };
+  // Encode the text into a Uint8Array of UTF-8 bytes
+  const encoder = new TextEncoder('utf-8');
+  const utf8Bytes = encoder.encode(text);
+
+  // Convert each byte to a two-digit hexadecimal string and join them
+  const byteArray = Array.from(utf8Bytes)
+
+
+  const byteSize = 255
+  let acc = 0
+  Object.keys(params).forEach((p, i) => {
+    const { type, transform = (x) => x, val } = params[p]
+
+    let byteVal = byteArray[i % byteArray.length];
+    acc += byteVal
+    byteVal = [byteVal + acc] % byteSize
+
+    if (type === SELECTION) {
+
+      pat = pat[p](transform(val[byteVal % val.length]))
+
+
+    } else {
+      const min = val.at(0)
+      const max = val.at(-1)
+      const pTotal = max - min
+      const valAdjusted = ((pTotal / byteSize) * byteVal) + min
+
+      pat = pat[p](transform(valAdjusted))
+
+    }
+  })
+
+  return pat
+})
