@@ -1,0 +1,40 @@
+samples('github:tidalcycles/Dirt-Samples')
+
+setCpm(132/4)
+
+_arp: n(irand("<8 [12|8|8]>")).struct("x*<8 16>").scale("f:pentatonic").s("sine,pulse").unison("<1 4>")
+  .room(1)
+  .lpf(1000)
+  .lpenv(slider(0,0,12))
+  .delay(.7)
+  .orbit(3)
+  .postgain(.7)
+  ._punchcard()
+
+vox: s("female").slice(8, "[0|1|2|3|4|5|6|7]").clip(1).slow(4)
+  .ply("[1|1|1|2]".fast(4)).sometimes(x => x.lpf(2000))
+  ._punchcard()
+  // .delay(.7)
+  // .att(1)
+  // .postgain(2)
+
+bass: note("d1,d2").s("supersaw")
+  .legato(.9)
+  .delay(.7)
+  .seg(16)
+  .orbit(4)
+  .postgain(1.5)
+
+drums: stack(
+  s("bd*4").bank("tr909").duck("3:4").duckdepth(.7).duckatt(.2),
+  // s("cp:4").bank("tr909").euclid(7,16).slow(2).gain(rand.range(.3, .8)),
+  s("loopy").clip(1),
+  // s("rim:3*16").bank("tr909").gain("<.2 .6>*8")
+).postgain(.8)._scope()
+
+// all(x => x.room(mouseX.seg(4).range(0,3)).hpf(mouseX.seg(8).range(0,1500)))
+// all(x => x.hpf(mouseX.seg(8).range(0,1000)))
+// all(x => x.lpf(mouseX.seg(8).range(4000,200)))
+// all(x => x.crush(mouseX.seg(4).range(12,1)))
+// all(x => x.cut(2))
+// all(x => x.striate(2))
