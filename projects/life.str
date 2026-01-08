@@ -28,7 +28,7 @@ bass: note("d1,d2").s("supersaw")
 drums: stack(
   s("bd*4").bank("tr909").duck("3:4").duckdepth(.7).duckatt(.2),
   // s("cp:4").bank("tr909").euclid(7,16).slow(2).gain(rand.range(.3, .8)),
-  s("loopy").clip(1),
+  s("shaky").clip(1),
   // s("rim:3*16").bank("tr909").gain("<.2 .6>*8")
 ).postgain(.8)._scope()
 
