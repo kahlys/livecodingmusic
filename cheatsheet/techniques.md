@@ -25,3 +25,33 @@ Using the almostNever function, it will almost never trigger an event. The ply p
 
 - Random arp using irand: `n(irand(8)).scale('C4:minor').s("supersaw").segment(8).rib(4,2)`
 - Random arp using scramble: `note("0 2 -1 4").scale('C4:minor').sound("sawtooth")`
+
+## Block Arrange
+
+```js
+await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();
+
+const bd = s("bd").bank("tr909").struct("x*4")
+const hat = s("hh").bank("tr909").struct("<~ x>*4")
+const bass = s("e2").struct("x*16").s("supersaw")
+
+$: blockArrange(
+    [ 
+      [[bd],       "<1 1 1 1 1 1 1 1 1 1>"],
+      [[bass],     "<0 0 1 1 1 S V Y 1 T>"],
+      [[hat],      "<0 1 1 1 1 1 1 1 G G>"],  
+    ],
+    //ADD CUSTOM BINDINGS
+    [[(m) => m.includes('S') , (x) => x.hpf(500)],
+     [(m) => m.includes('T') , (x) => x.hpf(100)],
+     [(m) => m.includes('G') , (x) => x.ply(2)],
+     [(m) => m.includes('V') , (x) => x.lpf(200)],
+     [(m) => m.includes('W') , (x) => x.lpf(500)],
+     [(m) => m.includes('X') , (x) => x.lpf(1000)],
+     [(m) => m.includes('Y') , (x) => x.lpf(2500)],
+     [(m) => m.includes('Z') , (x) => x.lpf(4000)],
+    ]
+  )
+  // .rib(1,3) // START - LENGTH
+  ._punchcard()
+```
