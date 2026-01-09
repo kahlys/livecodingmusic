@@ -55,3 +55,28 @@ $: blockArrange(
   // .rib(1,3) // START - LENGTH
   ._punchcard()
 ```
+
+## Fun with samples
+
+- Playing the sample and add delay
+
+```js
+vox: s("awake")
+  .scrub(saw.seg(16).slow(2))   // scrub with saw wave (16 segments from 0 to 1) 
+  .note("a1")                   // pitch to a1
+  .mask("<1 0 0 0>".slow(2))    // mask to play only first beat every 8 beats
+  .delay(rand)                  // add delay with random time
+  .delayfeedback(rand.fast(5))
+  .delaytime(rand.fast(4))
+  .hpf(500)                     // high pass filter
+```
+
+- Playing the sample as a rhythmic pattern
+
+```js
+voxperc: s("awake")
+  .scrub(rand.seg(16).rib(7,1)) // scrub with random segments
+  .note("a2").speed(.5)         // modify speed and pitch
+  .delay(rand).delayfeedback(rand.fast(5))
+  .hpf(500)
+```
