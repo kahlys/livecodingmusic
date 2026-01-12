@@ -439,3 +439,225 @@ register('stxt', (text, pat) => {
 
   return pat
 })
+
+/* Oldschool timestretching function 
+@example
+$: s("brk").sf(2)
+*/
+register('sf', (cycles, x) => {
+  const segments = 16;
+  cycles = reify(cycles)
+  return x.scrub(saw.seg(cycles.mul(segments)).slow(cycles))
+})
+
+/* swap one value with another
+@example
+s("bd bd sd bd".fast(4).swap("bd", "<lt bd:3>").swap("sd", "hh sd:2"))
+
+ */
+register('swap', (find, rep, x) => {
+  return x.withValue(v => {
+    if (v === find) {
+      return rep
+    }
+    return v
+  })
+})
+
+// GLOSSING FUNCTIONS <3 these are pulled from Glossing's repo: 
+// https://codeberg.org/glossing/Strudel_Scripts
+
+
+/* Similar to set.mix but won't write over values that `vals` does not contain.
+  This lets you do things like
+
+  $: s("bd").n(5).room(0.1).rlp(1800).up(`<
+    1 0.5 ~ 0.7:4
+    1 0.5 ~ ~
+    1 0.5 ~ [0.4:4 0.6:4]
+    1 0.5 1:22:sd:1 ~
+  >*8`.as("velocity:n:s:room"))
+
+  to do Elektron-style parameter locks ++ set the rhythm of an element (similar to `struct`)
+  at the same time
+*/
+register(
+  'up',
+  (vals, pat) =>
+    pat
+      .withValue(
+        (v) => (vNew) =>
+          Object.assign(v, Object.fromEntries(Object.entries(vNew).filter(([_, val]) => val !== undefined))),
+      )
+      .appBoth(vals),
+  false,
+);
+
+/* Plays a sound once (when the REPL is updated) but locked to a provided grid/quantize
+
+So doing
+
+s("downlifter").oneshot(4)
+
+will play it, but only at the next 4-divisible cycle (t = 0, 4, 8, etc)
+Useful for locking it into relevant parts of the arrangement
+
+*/
+register('oneshot', (grid, pat) => {
+  const t = getTime();
+  const qt = Math.ceil(t / grid) * grid;
+  return pat.filterWhen((t) => t >= qt && t < qt + 1);
+});
+
+/* Executes a function when a specific control key matches a specific value. For example
+
+$: s("bd hh sd hh").filtval("s", "bd", x => x.duck(2))
+
+To only have the kicks trigger the sidechain
+
+*/
+register('filtval', (key, val, func, pat) => {
+  return pat.when(
+    pat.fmap((v) => v[key] === val),
+    func,
+  );
+});
+
+/* Polyphonic non-legato glide
+
+This also has the nice feature of glide persisting across notes, so if you have a very long glide
+it'll actually slowly drift between those targets rather than starting its glide over on
+every new note
+
+*/
+register(
+  'glide',
+  (time, pat) => {
+    let curr = [],
+      prev = [],
+      lastT = null;
+    const query = (state) => {
+      const trig = !!state.controls._cps; // an actual trigger as opposed to lookahead
+      const haps = pat.query(state);
+      const output = [];
+      haps.map((hap) => {
+        const { value, whole } = hap;
+        const t = Number(whole.begin);
+        if (trig && (lastT == null || lastT !== t)) {
+          prev = curr;
+          curr = [];
+          lastT = t;
+        }
+        const glideHaps = time.query(state.setSpan(hap.wholeOrPart()));
+        glideHaps.map((glideHap) => {
+          const part = hap.part.intersection(glideHap.part);
+          if (!part) return;
+          const context = hap.combineContext(glideHap);
+          const glideT = glideHap.value;
+          const freqF = getFrequencyFromValue(value, value.s === 'sbd' ? 29 : 36); // target
+          const freqI = prev.length
+            ? prev.reduce((closest, v) => {
+              const phase = glideT > 0 ? Math.min((t - v.t) / glideT, 1) : 1;
+              const cand = v.freqI + phase * (v.freqF - v.freqI);
+              if (closest == null) return cand;
+              return Math.abs(cand - freqF) < Math.abs(closest - freqF) ? cand : closest;
+            }, null)
+            : freqF;
+          if (trig) {
+            curr.push({ freqI, freqF, t });
+          }
+          let newVal = value;
+          if (Math.abs(freqF - freqI) > 1e-6) {
+            newVal = {
+              ...value,
+              panchor: 0,
+              psustain: 0,
+              pattack: 0,
+              pdecay: glideT,
+              penv: -12 * Math.log2(freqF / freqI),
+            };
+          }
+          output.push(new Hap(whole, part, newVal, context));
+        });
+      });
+      return output;
+    };
+    return new Pattern(query);
+  },
+  false,
+);
+
+/* Try all(x => x.glitch(rand)) to absolutely destroy your patterns :p <3
+
+Fun to trigger at the end of bars for weird glitchy fills
+
+*/
+register('glitch', (amt, pat) => {
+  return pat.fmap((v) => {
+    const keys = Object.keys(v);
+    const numKeys = keys.length;
+    for (let i = 0; i < numKeys; i++) {
+      const k = keys[i];
+      if (['orbit', 'duckorbit'].includes(k)) continue;
+      const rand = 2 * Math.random() - 1;
+      const val = v[k];
+      const isNumber = typeof val === 'number';
+      if (k === 'note' && !isNumber) {
+        const midi = noteToMidi(val);
+        v[k] = Math.round(Math.max(midi * (1 + amt * 0.5 * Math.random()), 24));
+      } else if (isNumber) {
+        v[k] *= 1 + rand * amt;
+      }
+    }
+    return v;
+  });
+});
+
+/* Square ⬜️. Useful for making knobs / sliders feel smoother
+*/
+register('sq', (pat) => pat.fmap((v) => v * v));
+
+/* Strums chords
+
+$: s("gm_slap_bass_2")
+  .note("a1,c2,e3,g4").clip(0.125).decay(0.2).delay(0.3)
+  .strum(slider(0.0849, 0, 0.1))._pianoroll()
+
+*/
+register('strum', (amt, pat) => {
+  return pat
+    .collect()
+    .withHaps((haps) => {
+      return flatten(
+        haps.map((hap) => {
+          const collected = hap.value;
+          if (collected.length <= 1) {
+            return group;
+          }
+          const l = collected.length - 1;
+          return collected.map((hap, idx) => {
+            const offset = amt * (2 * idx / l - 1);
+            return hap.withSpan((span) => span.withTime((t) => t + offset));
+          });
+        })
+      );
+    });
+});
+
+/* Moves hits off the grid and adds velocity variation
+
+$: s("bd hh sd hh").humanize(slider(0.0328, 0, 1))
+  .bank("tr909")
+  ._pianoroll()
+metronome: s("hh*8").n(9).dec(0.3)
+
+*/
+register('humanize', (amt, pat) => {
+  const amtC = clamp(amt, 0, 1);
+  return pat.withHaps((haps) => {
+    return haps.map((hap) => {
+      const offset = 0.1 * amtC * (2 * Math.random() - 1);
+      return hap.withSpan((span) => span.withTime(t => t + offset));
+    })
+  }).withValue((v) => ({ ...v, velocity: (v.velocity ?? 1) + 0.5 * amtC * (2 * Math.random() - 1) }));
+});
