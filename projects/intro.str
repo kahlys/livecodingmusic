@@ -32,6 +32,7 @@ bass_calm: note("<5 4 0 _ _ _ _ _>").scale("a:minor").transpose("<-12 -24>/8")
   .room("1:4")
   .diode(1.4)
 
+// _bass_seg_8: n(irand("0@6 [0 | 4]@2")).s("supersaw").scale("a:minor:pentatonic").transpose("-12,-24")
 _bass_seg_8: note("a2@6 [f3 <e3 g2> | a2 | a2]@2").s("supersaw").transpose("0,-12")
   .seg(8)
   .lpf(600).lpenv(2)
