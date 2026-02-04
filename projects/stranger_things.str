@@ -1,0 +1,48 @@
+await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();
+
+setCpm(63/4)
+
+const arp = note("0 2 -1 2")
+  .scale("g:minor").s("pulse, sawtooth")
+  .detune(sine.fast(8).range(.3,.7))
+  .pan(sine.fast(8).range(.3,.7))
+  .att(.02).clip(.5)
+  .delay(.7).rel(1)
+  .lpf(1000).lpenv(2)
+  .room("1:3")
+  .chorus(1)
+
+const bass = note("0 2 -2 -1".add("0,-7")).slow(2).scale("g:minor")
+  .s("supersaw")
+  .clip(.8)
+  .lpf(300).lpenv(2).lpd(1)
+  .room("1:4")
+  .diode("1.4:.7")
+  .postgain(.8)
+
+const mel = note("- [- 0 2 0] [4 3] [2 [3 2]] - [- 0 2 0] [4 3] [2 [3 0]]")
+  .transpose(7).slow(2)
+  .scale("g:minor").s("triangle, pulse")
+  .rel(".2 _ _ [.2 [.2 .8]]")
+  .clip(.9).att(.02)
+  .delay(.4).delayfb(.3)
+  .lpf(1000).lpq(2).hpf(1000).lpenv(2)
+  .room("1")
+  .gain(.9)
+
+$: blockArrange(
+    [ 
+      [[mel],  "<- - - - 1 1 W W - - - ->"],
+      [[arp],  "<1 1 1 1 1 1 1 1 V V - ->"],
+      [[bass], "<- - 1 1 1 1 1 1 - - - ->"],  
+    ],
+    [[(m) => m.includes('S') , (x) => x.hpf(500)],
+     [(m) => m.includes('T') , (x) => x.hpf(100)],
+     [(m) => m.includes('V') , (x) => x.lpf(200)],
+     [(m) => m.includes('W') , (x) => x.lpf(800)],
+     [(m) => m.includes('X') , (x) => x.lpf(1000)],
+     [(m) => m.includes('Y') , (x) => x.lpf(2500)],
+     [(m) => m.includes('Z') , (x) => x.lpf(4000)],
+    ]
+  )
+  ._pianoroll({width:1400})
