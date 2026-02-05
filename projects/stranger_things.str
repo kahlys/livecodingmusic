@@ -3,34 +3,37 @@ await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent
 setCpm(63/4)
 
 const arp = note("0 2 -1 2")
-  .scale("g:minor").s("pulse, sawtooth")
+  .scale("g:minor").s("pulse, gm_synth_bass_2:3")
   .detune(sine.fast(8).range(.3,.7))
   .pan(sine.fast(8).range(.3,.7))
   .att(.02).clip(.5)
-  .delay(.7).rel(1)
-  .lpf(500).lpenv(2)
+  .delay(.4)
+  .rel(.6)
+  .lpf(500)
+  .lpenv(1)
   .room(".6")
   .chorus(1)
 
-const bass = note("0 2 -2 -1".add("-7")).slow(2).scale("g:minor")
+const bass = note("0 2 -2 -1".add("-14")).slow(2).scale("g:minor")
   .s("supersaw")
   .clip(.8)
   .att(.05)
   .rel(.7)
   .lpf(200)
-  // .lpenv(2)
+  .lpenv(2)
   .lpd(1)
-  // .room("1:4")
-  // .diode("1.4:.7")
+  .room(".6")
+  .diode("1.4:.7")
   .postgain(.8)
 
-const mel = note("- [- 0 2 0] [4 3] [2 [3 2]] - [- 0 2 0] [4 3] [2 [3 0]]")
+const mel = note("- [- 0 2 0] [4 3] [2@2 3 2] - [- 0 2 0] [4 3] [2@2 3 0]")
   .transpose(7).slow(2)
   .scale("g:minor").s("triangle, pulse")
-  .rel(".2 _ _ [.2 [.2 .8]]")
-  .clip(.9).att(.02)
+  .att(.05)
+  .rel(1)
+  .cut(1)
   .delay(.4).delayfb(.3)
-  .lpf(800).lpq(2).hpf(1000).lpenv(2)
+  .lpf(600).lpq(2).hpf(1000).lpenv(2)
   .room("1")
   .gain(.9)
 
@@ -42,12 +45,11 @@ $: blockArrange(
     ],
     [[(m) => m.includes('S') , (x) => x.hpf(500)],
      [(m) => m.includes('T') , (x) => x.hpf(100)],
-     [(m) => m.includes('V') , (x) => x.lpf(200)],
+     [(m) => m.includes('V') , (x) => x.lpf(300)],
      [(m) => m.includes('W') , (x) => x.lpf(800)],
      [(m) => m.includes('X') , (x) => x.lpf(1000)],
      [(m) => m.includes('Y') , (x) => x.lpf(2500)],
      [(m) => m.includes('Z') , (x) => x.lpf(4000)],
     ]
   )
-  .postgain(.8)
   ._pianoroll({width:1400})
