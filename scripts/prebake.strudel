@@ -192,6 +192,13 @@ register('trancegate', (density, seed, length, x) => {
   return x.struct(rand.mul(density).round().seg(16).rib(seed, length)).fill().clip(.7)
 })
 
+//Better trancegate
+register('tgate', (amt, cycle, length, pat) => {
+  amt = reify(amt)
+  return pat.struct("x!16".degradeBy(amt.mul(-1).add(1))
+    .rib(cycle, length)).fill().clip(.7)
+})
+
 //increasing the delay increases the feedback as well
 register('dly', (amt, x) => {
   amt = reify(amt)
@@ -498,6 +505,15 @@ Pattern.prototype.over = function (...inp) {
   return this.set.out(stack(...inp))
 }
 
+Pattern.prototype.overin = function (...inp) {
+  return this.set.in(stack(...inp))
+}
+
+window.sb = register('sb', (p, cb, pat) => {
+  return pat.sometimesBy(p, cb);
+})
+
+
 window.SCALE = 'e:minor'
 
 window.setScale = (sc) => {
@@ -536,6 +552,14 @@ window._comb = register('comb', (inp, pat) => {
 
 registerFunc('noisehat', (seg = 16, modu = tri, speed = 4, min = .05, max = .12) => s('white').seg(seg).dec(modu.fast(4).range(min, max)))
 registerFunc('zap', (amount = .8, speed = .1, note = 'c3',) => s("sine").penv(reify(amount).mul(120)).note(note).pdec(speed).dec(speed).o(8))
+
+// create hardstlye kickdrums, replace defualts with your wavetable and sample of choice
+window.hbd = (wt = "wt_hbd", click = "hclick:6", warp = 0.1) => {
+  return stack(s(wt).wtenv(1).wtatt(.72).FX(dist(1.5)).warp(warp)
+    .warpmode(15)
+    .att(.2),
+    s(click).FX(gain(.6)),)
+}
 window.roller = (wt = 0) => s("wt_digi")
   .wt(wt).wtenv(0).wtdecay(.2).warp(0).warpmode(7).warpenv(.5).warpdec(.1)
   .dec(.2).lpq(0).dly(.8).room(.7).roomsize(4).diode("1").acidenv(.44)
@@ -752,3 +776,35 @@ register('humanize', (amt, pat) => {
     })
   }).withValue((v) => ({ ...v, velocity: (v.velocity ?? 1) + 0.5 * amtC * (2 * Math.random() - 1) }));
 });
+
+
+/* Pitchbend your sounds! Importantly, the bending (`bends`) pattern can have events
+occurring _between_ events of the main pattern, which distinguishes it from the normal
+pitch bend (`penv`).
+
+@example
+$: s("supersaw").detune(0.4).room(0.4).note("F1")
+  .bend("<0 2 12@2 24 0 7 36>*16", "0 0.3", "0.3 0")
+*/
+const __semitoneBend = Math.pow(2, 1 / 12);
+Pattern.prototype.bend = function (bends = 0, speedUp = 0.05, speedDown = 0.05) {
+  window.__legatoBusID ??= 0;
+  const uuid = window.__legatoBusID++;
+  bends = reify(bends);
+  speedUp = reify(speedUp);
+  speedDown = reify(speedDown);
+  // Create the bending pattern and make it play by tagging it with `p`
+  bends.fmap((b) => (su) => (sd) => ({
+    s: 'one',
+    attack: su,
+    release: sd,
+    bus: uuid,
+    sustain: 1,
+    dry: 0,
+    gain: __semitoneBend ** b - 1,
+    dc: 0,
+  })).appBoth(speedUp).appBoth(speedDown)
+    .p('bend_' + uuid);
+  // Modulate the original pattern
+  return this.bmod({ c: 's', b: uuid, dr: 1 });
+}
