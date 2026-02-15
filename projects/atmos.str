@@ -19,6 +19,7 @@ bass: note("<0 <-6 1> _ _>").scale("a:mixolydian").transpose("<-12 -24>/4")
   .lpf(200).lpenv(2).lpd(3)
   .room("1:4")
   .diode(1.4)
+  .orbit(3)
 
 mel: note("0 - - 1 -".add("7,14")).scale("a:mixolydian").s("gm_lead_6_voice:1")
   .att(.02).dec(2).room("1:4").legato(perlin.fast(16).range(.4,.9))
@@ -30,6 +31,6 @@ mel: note("0 - - 1 -".add("7,14")).scale("a:mixolydian").s("gm_lead_6_voice:1")
   ._punchcard({width:1400})
 
 drums: stack(
-  s("bd*4").bank("tr909").duck("3:4").duckdepth(.5).duckatt(.2).postgain(1.2),
+  s("bd*4").bank("tr909").duck("3:4").duckdepth(.8).duckatt(.3).postgain(1.2),
   s("perc!16").bank("sergemodular").n(irand(5).rib(2,1)).dec(.1).almostNever(ply("2 | 2 | 4")).gain(.7)
 )._scope({width:1400})
