@@ -17,15 +17,15 @@ pedal: stack(
 )
   .delay(.8).delayfb(.7)
   .lpf(sine.range(200,400).fast(12))
-  .lpf(sine.range(100,800).fast(8))
+  // .lpf(sine.range(100,800).fast(8))
   .lpe(1)
   .lpq(.3)
   .orbit(3)
   ._punchcard()
 
 drums: stack(
-  s("sbd*2").duck("3:4").duckdepth(.7).duckatt(.3),
-  s("sh:5").bank("tr808").struct("- x").speed(.8),
+  s("sbd").beat("0,[-|-|-|1]",8).duck("3:4").duckdepth(.7).duckatt(.3),
+  s("sh:5").bank("tr808").struct("- x").speed(.8).gain(.7),
   s("hh").bank("tr808").n(irand(5).rib(2,1)).struct("[x!3 -!2 x!10 -]").speed(1.25).room(sine.range(.1, .4)).jux(rev).postgain(.8),
 )
   ._scope({width:1400})
