@@ -1,0 +1,40 @@
+// @title sphere @by lou queer
+
+setCpm(130/4)
+
+amb: s("gm_fx_atmosphere:0").note("<e5 - b5 ->".add("0,-12"))
+  .att(.5).rel(2)
+  .lpf(600).hpf(400)
+  .room("1:3")
+  .diode(1.4)
+  .postgain(.7)
+  ._punchcard({width:1400})
+
+pedal: stack(
+  note("<e3 c3>/2").s("saw").trancegate(1.8, 74, 1).amp(.5),
+  note("<g4 e5>/2").s("saw").trancegate(1.8, 74, 1).hpf(400).amp(.5),
+  note("<b5 e4>/2").s("saw").trancegate(1.2, 70, 2).hpf(400).amp(.9),
+)
+  .delay(.8).delayfb(.7)
+  .lpf(sine.range(200,400).fast(6).seg(4/.7))
+  .lpf(sine.range(100,800).fast(4).seg(4/.75))
+  .lpe(1)
+  .lpq(.3)
+  .orbit(3)
+  ._punchcard({width:1400})
+
+drums: stack(
+  s("sbd").beat("0,[-|-|-|1]",8).duck("3:4").duckdepth(.7).duckatt(.3),
+  s("sh:5").bank("tr808").struct("- x").speed(.8).gain(.7),
+  s("hh").bank("tr808").n(irand(5).rib(2,1)).struct("[x!3 -!2 x!10 -]").speed(1.25).room(sine.range(.1, .4)).jux(rev).postgain(.8),
+)
+  ._scope({width:1400})
+  
+bass: note("<<e3 e2> _ _ _ _ _ a3 c3>")
+  .s("supersaw")
+  .detune(.8)
+  .lpf(200).lpenv(2).lpd(3)
+  .room("1:4")
+  .diode(1.4)
+  .orbit(3)
+  ._spectrum({width:1400})

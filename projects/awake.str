@@ -1,0 +1,20 @@
+// @title awake @by lou queer
+
+await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/switchangel/strudel-scripts/refs/heads/main/prebake.strudel')).text()); })();
+
+setCpm(124/4)
+
+drums: s("bd").bank("tr909").struct("x*4").duck("3").duckdepth(.8).duckatt(.2)
+
+bass: s("square,saw").n(irand("<1!7 4>*2")).scale("<a2!7 f2>:minor:pentatonic")
+  .trans("0,-12")
+  .rlpf(slider(0.306))
+  .lpenv(2)
+  .trancegate(2,47,1)
+  .orbit(3)
+
+vox: s("awake").scrub(saw.seg(16).slow(2)).note("a1").mask("<1 0 0 0>".slow(2))
+  .delay(rand).delayfeedback(rand.fast(5)).delaytime(rand.fast(4)).hpf(500)
+
+voxperc: s("awake").scrub(rand.seg(16).rib(17,3)).note("a2").speed(.5)
+  .delay(rand).delayfeedback(rand.fast(5).mul(.5)).hpf(3000).postgain(.8)
