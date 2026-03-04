@@ -16,7 +16,28 @@ register('acidenv', (x, pat) => pat.lpf(100)
 
 setGainCurve(x => Math.pow(x, 2))
 
+window.soloedOrbits = []
+window.soloOrbit = (...orbits) => {
+  window.soloedOrbits = orbits
+}
+window.mutedOrbits = []
+window.solo = (...orbits) => {
+  window.soloedOrbits = orbits
+}
+window.mute = (...orbits) => {
+  window.mutedOrbits = orbits
+}
+register('o', (orbit, pat) => {
+  pat = pat.orbit(orbit)
+  if (mutedOrbits.includes(orbit)) {
+    return pat.hush()
+  }
+  if (!soloedOrbits.length || soloedOrbits.includes(orbit)) {
+    return pat
+  }
+  return pat.hush()
 
+})
 
 //tracker style arrangement
 window.track = function (...input) {
@@ -194,9 +215,51 @@ register('trancegate', (density, seed, length, x) => {
 
 //Better trancegate
 register('tgate', (amt, cycle, length, pat) => {
+  const cycleSubstitute = new Map([
+    [0, 45],
+    [1, 116],
+    [2, 99],
+    [3, 100],
+    [4, 107],
+    [5, 53],
+    [6, 57],
+    [7, 58],
+    [8, 67],
+    [9, 81],
+    [10, 89],
+    [11, 115],
+    [12, 8],
+    [13, 118],
+    [14, 120],
+    [15, 144],
+    [16, 149],
+    [17, 161],
+    [18, 197],
+    [19, 206],
+    [20, 209],
+    [21, 230],
+    [22, 269],
+    [23, 274],
+    [24, 293],
+    [24, 295],
+    [25, 308],
+    [31, 37],
+    [32, 40],
+    [33, 59],
+    [34, 63],
+    [35, 65],
+    [36, 68],
+    [37, 70],
+    [37, 225],
+  ])
+  cycle = reify(cycle)
+    .withValue(v => {
+      console.info(v)
+      return cycleSubstitute.get(v) ?? v
+    })
   amt = reify(amt)
-  return pat.struct("x!16".degradeBy(amt.mul(-1).add(1))
-    .rib(cycle, length)).fill().clip(.7)
+  return pat.seg(16).degradeBy(amt.mul(-1).add(1))
+    .rib(cycle, length).fill().clip(.7)
 })
 
 //increasing the delay increases the feedback as well
@@ -529,6 +592,47 @@ register('ifit', (cycles, pat) => {
 })
 
 
+// Easy arpeggiating
+/*
+@example
+$: n(trancearp("<0:2:6@3 2:4:8>", "F@5 B@3", "<1 1 1@2 1 1@2 1>*16"))
+  .acidenv(trancearp(".4:.5:.7", "F B", "<1!3 1@3 1!2>*16"))
+  .scale("g:minor").delay(.6)≥
+  .s("sawtooth")
+*/
+window.trancearp = function (notes, rst = 0, rytm = 0) {
+  const rstPresets = [
+    "F",
+    "B",
+    "F B F B",
+    "F@3 B@3 F F",
+    "F@12 F@2 F@2",
+  ]
+  const rytmPresets = [
+    "x!16",
+    "<1 1@2 1 1@2 1 1@2 1 1@2 1 1 1 1>*16",
+    "<1 1 _ 1 1 1 1 1>*16"
+
+  ]
+
+  if (typeof rst == 'number') {
+    rst = pickmod(rstPresets, rst)
+  }
+  if (typeof rytm == 'number') {
+    rytm = pickmod(rytmPresets, rytm)
+  }
+  const pats = {
+    F: "<0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15>*16",
+    B: "<15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0>*16"
+    // F: saw.mod(16).mul(16),
+    // B: isaw.mod(16).mul(16),
+  }
+
+  return pickmod(notes, pickRestart(pats, rst)).struct(rytm)
+  // .restart(rst)
+}
+
+
 //FX
 
 window._comb = register('comb', (inp, pat) => {
@@ -552,14 +656,6 @@ window._comb = register('comb', (inp, pat) => {
 
 registerFunc('noisehat', (seg = 16, modu = tri, speed = 4, min = .05, max = .12) => s('white').seg(seg).dec(modu.fast(4).range(min, max)))
 registerFunc('zap', (amount = .8, speed = .1, note = 'c3',) => s("sine").penv(reify(amount).mul(120)).note(note).pdec(speed).dec(speed).o(8))
-
-// create hardstlye kickdrums, replace defualts with your wavetable and sample of choice
-window.hbd = (wt = "wt_hbd", click = "hclick:6", warp = 0.1) => {
-  return stack(s(wt).wtenv(1).wtatt(.72).FX(dist(1.5)).warp(warp)
-    .warpmode(15)
-    .att(.2),
-    s(click).FX(gain(.6)),)
-}
 window.roller = (wt = 0) => s("wt_digi")
   .wt(wt).wtenv(0).wtdecay(.2).warp(0).warpmode(7).warpenv(.5).warpdec(.1)
   .dec(.2).lpq(0).dly(.8).room(.7).roomsize(4).diode("1").acidenv(.44)
@@ -596,13 +692,17 @@ window.roller2 = (acidenv = .5) => {
   to do Elektron-style parameter locks ++ set the rhythm of an element (similar to `struct`)
   at the same time
 */
-register(
+window.up = register(
   'up',
   (vals, pat) =>
     pat
       .withValue(
-        (v) => (vNew) =>
-          Object.assign(v, Object.fromEntries(Object.entries(vNew).filter(([_, val]) => val !== undefined))),
+        (v) => (vNew) => {
+          const vUp = Object.fromEntries(
+            Object.entries(vNew).filter(([_, val]) => val !== undefined)
+          );
+          return { ...v, ...vUp };
+        }
       )
       .appBoth(vals),
   false,
