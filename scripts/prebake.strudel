@@ -557,7 +557,7 @@ Pattern.prototype.sf = function (cycles, segments = 16) {
     .sustain(1)
 }
 
-register('octave', (oct, pat) => {
+register('octave2', (oct, pat) => {
   const transp = (oct - 3) * 12
   return pat.transpose(transp)
 
@@ -566,7 +566,7 @@ register('octave', (oct, pat) => {
 //n + defined scale
 Pattern.prototype.nsc = function (pat = 0, oct = 3) {
   pat = reify(pat)
-  return this.set.out(pat.as("n").sc()).octave(oct);
+  return this.set.out(pat.as("n").sc()).octave2(oct);
 };
 
 
