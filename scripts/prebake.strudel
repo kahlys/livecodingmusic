@@ -43,6 +43,74 @@ register('o', (orbit, pat) => {
 
 })
 
+Pattern.prototype.col = function (col) {
+  const colors = [
+    "#50d1f8",
+    "#8EDF5F",
+    "#995CD0",
+    "#EC7744",
+    "#5549B7",
+    "#201D30",
+  ]
+  if (typeof col === 'number') {
+    // if (col === 0) {
+    //   return this
+    // }
+    // col = col - 1
+    col = colors[col % colors.length]
+  }
+  return this.color(col)
+
+}
+
+window.CUE = "0"
+
+window.cue = function (...inp) {
+  const index = Math.min(window.CUE, inp.length - 1)
+
+  return reify(inp[index]).col(index)
+}
+window.getCue = () => window.CUE
+window.setCue = function (cue) {
+  window.CUE = reify(cue)
+}
+Pattern.prototype.cue = function (cues, cb) {
+  cues = reify(cues)
+
+  return window.getCue().innerBind(c => {
+    return cues.innerBind(cues => {
+      cues = [cues].flat()
+      if (cues.includes(c)) {
+
+
+        return cb?.(this).col(c) ?? this.col(c)
+      } else if (cb == null) {
+        return silence
+      }
+
+      return this.col(c)
+
+    })
+  })
+
+
+}
+
+Pattern.prototype.onCue = function (cues) {
+  cues = reify(cues)
+  return window.getCue().innerBind(c => {
+    return cues.innerBind(cues => {
+      cues = [cues].flat();
+      if (!cues.includes(c)) {
+        return silence
+      }
+      return this.col(c)
+
+    })
+
+  })
+}
+
 register('accent', (accent, pat) => {
   if (accent == 0) {
     return pat
@@ -344,6 +412,26 @@ register('vstruct', (ipat, pat) => {
 
 // sets my Ableton vocoder CC key to the specified value, probably only useful for me
 
+window.voc = (key) => {
+  let value;
+  switch (key.toLowerCase()) {
+    case 'c': value = 0; break;
+    case 'c#': value = 0.2; break;
+    case 'd': value = 0.25; break;
+    case 'd#': value = 0.3; break;
+    case 'e': value = 0.4; break;
+    case 'f': value = 0.5; break;
+    case 'f#': value = 0.6; break;
+    case 'g': value = 0.7; break;
+    case 'g#': value = 0.75; break;
+    case 'a': value = 0.8; break;
+    case 'a#': value = 0.9; break;
+    case 'b': value = 1; break;
+    default: value = 0; // fallback value if key is not recognized
+  }
+
+  return s("white").gain(0).ccn(34).ccv(value).midi('tout');
+}
 register('voc', (key, x) => {
   let value;
   switch (key.toLowerCase()) {
