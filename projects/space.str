@@ -33,6 +33,18 @@ bass: s("wt_digital, supersaw").nsc("0","1,2")
   .o(2)
   ._punchcard({width:1400})
 
+_bass2: s("wt_digital, supersaw").nsc("[0@6 <2 -1>]/2","1,2")
+  .unison(4)
+  .detune(saw.fast(16).range(.3,.7))
+  .lpf("2000")
+  .lpe(2)
+  .lpa(.2)
+  .diode("1")
+  .room("1:3")
+  .postgain(.8)
+  .o(2)
+  ._punchcard({width:1400})
+
 drums: stack( 
   sound("sbd").beat("0,4,8,12",16).duck("2,3").duckatt(".25").duckdepth(.8).gain(.8),
   s("perc!16").bank("sergemodular").n(irand(5).rib(22,4)).dec(.1).almostNever(ply("2")).gain(.9),
