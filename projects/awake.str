@@ -17,7 +17,7 @@ hh: s("hh").bank("tr909").n(4)
   .postgain(.8)
   ._punchcard()
 
-rr: s("tr909_rim").gain(rand.range(.7,.9)).beat("2?, 8",16)
+rr: s("tr909_rim:1").gain(rand.range(.6,.8)).beat("2?, 8",16)
 
 p: s("perc!16").bank("sergemodular").n(irand(5).rib(2,1)).dec(.1).almostNever(ply("2 | 2 | 4"))
 
