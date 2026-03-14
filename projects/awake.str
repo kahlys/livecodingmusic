@@ -14,7 +14,7 @@ hh: s("hh").bank("tr909").n(4)
   .dec(1)
   .sus(0)
   .clip(.8)
-  .postgain(.8)
+  .postgain(.6)
   ._punchcard()
 
 rr: s("tr909_rim:1").gain(rand.range(.6,.8)).beat("2?, 8",16).speed(.8).clip(.6)
