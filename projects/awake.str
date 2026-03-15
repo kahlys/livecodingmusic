@@ -21,6 +21,15 @@ _rr: s("tr909_rim:1").gain(rand.range(.6,.8)).beat("2?, 8",16).speed(.8).clip(.6
 
 p: s("perc!16").bank("sergemodular").n(irand(5).rib(2,1))
 
+pad: s("gm_fx_soundtrack").n("0,2,8").scale("a5:minor")
+  .seg(8)
+  .unison(4).detune(tri.range(1,4).fast(8))
+  .fmtime(2,2)
+  .lpf(2000)
+  .room("1:3")
+  .delay(.7)
+  ._scope()
+
 bass: s("supersaw, wt_digital").n(irand("<1!7 4>*2")).scale("<a2!7 bb2>:minor")
   .trans("0,-12")
   .unison(4)
