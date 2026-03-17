@@ -14,6 +14,7 @@ lead: note("<11 6> 5 <9 4> 1 2 <-2 0> 0 0").scale("a:minor").s("supersaw")
   // .lpenv(2)
   .degradeBy(.2)
   .clip(.8)
+  .almostNever(x=>x.crush(3))
   .orbit(2)
   ._punchcard()
 
