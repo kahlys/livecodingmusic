@@ -28,7 +28,7 @@ bass_calm: note("<0 _ _ _ _ _ _ <-3 4>>").scale("a:minor").transpose("<-12 -24>/
 drums: stack(
   s("sbd").struct("x*4").duck(2).duckatt(.2).duckdepth(.7),
 
-  s("cp:1").bank("tr909").struct("- x - x").clip(.5).lpf(4000).hpf(600).postgain(.7),
+  s("cp:1").bank("tr909").struct("- - - x").clip(.5).lpf(4000).hpf(600).postgain(.7),
   
   s("sergemodular_perc")
   .struct("x*16?0.2")
