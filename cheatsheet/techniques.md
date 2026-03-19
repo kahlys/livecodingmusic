@@ -80,3 +80,18 @@ voxperc: s("awake")
   .delay(rand).delayfeedback(rand.fast(5))
   .hpf(500)
 ```
+
+- Chop Glitch
+
+```js
+samples({ p: "https://cdn.freesound.org/previews/848/848509_5674468-lq.mp3" });
+
+setcpm(120 / 4);
+
+s("p")
+  .scrub(saw.seg(16).slow(4))
+  .note("c2")
+  .room("1:.3")
+  .distort("3:.5")
+  .late("<0 _ _ [0 | 6]>")
+```
