@@ -19,7 +19,7 @@ echoes: n("[[5,7,9] [[10 | 3],5,7]] [[0 | 7],2,4]").slow(2)
   .phaser(.8)
   .orbit(3)
 
-bass: note("c2").trans("0,-12")
+bass: note("[c2@7 <b1 d2>]/2").trans("0,-12")
   .unison(4)
   .detune(rand)
   .s("supersaw")
