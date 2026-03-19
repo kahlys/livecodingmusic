@@ -2,17 +2,19 @@
 
 setCpm(120/4)
 
-lead: note("<11 6> 5 <9 4> 1 2 <-2 0> 0? 0").scale("a:minor").s("supersaw")
+lead: note("<11 6> 5 <9 4> 1 2 <-2 0> 0? 0").scale("a:minor").s("saw")
   .unison(4)
   .detune(sine.range(-1, 1).fast(2))
   .pan(rand)
   .delay(.7)
-  .lpf(900)
+  .lpf(perlin.range(800,8000).fast(2))
   // .lps(0).lpr(0).lpd(.001)
   // .lpenv(2)
   .almostNever(x=>x.jux(press).vib(".5 | 2 | 4"))
   .degradeBy(.2)
   .clip(.8)
+  .phaser(.8)
+  .distort(".7:.8:diode")
   .orbit(2)
   ._punchcard({width: 1200})
 
