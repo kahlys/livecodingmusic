@@ -1,0 +1,37 @@
+// @title desolation @by lou queer
+
+setcpm(120/4)
+
+loops: s("lq_pianoloop")
+  .scrub(saw.seg(16).slow(4)) 
+  .note("c2")
+  .room("1:.3")
+  // .distort("3:.5")
+  .late("<0 _ _ [0 | 6]>")
+  .orbit(3)
+
+echoes: n("[[5,7,9] [[10 | 3],5,7]] [[0 | 7],2,4]").slow(2)
+.scale("C:minor").transpose(12).sound("gm_fx_echoes,saw")
+  .distort("2:.5:flod")
+  .room("1:.3")
+  .lpf(perlin.range(800,1200).fast(16))
+  .orbit(3)
+
+bass: note("c2").trans("0,-12")
+  .unison(4)
+  .detune(rand)
+  .s("supersaw")
+  .distort("3:.5:diode")
+  .lpf(2000)
+  .orbit(3)
+
+kick: s("sbd").beat("0,6,10,12?",16)
+  .duck(3).duckdepth(.7).duckatt(.1)
+
+drums: s("amen:4").fit()
+  .room(".3:.3")
+  .delay(.7)
+  .scrub(irand(16).div(16).seg(8))
+  .sometimesBy(.1, ply("2 | 4"))
+  .gain(.8)
+  .rib(13,2)
