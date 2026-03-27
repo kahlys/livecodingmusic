@@ -3,7 +3,7 @@
 setCpm(140/4)
 
 arp: n("<0 2 3 0 <4 7> <5 <3 9>> 0>*16").s("sawtooth").sc()
-  .acidenv(slider(0.809))
+  .acidenv(slider(0.292))
   .delay(".7")
   // .fm(1.2).fmh(perlin.range(2,2.1).fast(8))
   .pan(rand)
@@ -15,7 +15,7 @@ const bass_pat = [
   "<0@8 <6 7 5>@4>",
 ]
 
-bass: n("-14!16".add(pick(bass_pat, 1))).sc()
+_bass: n("-14!16".add(pick(bass_pat, 1))).sc()
   .s("wt_digital,supersaw")
   .unison(5)
   .detune(perlin.range(.2,.7))
@@ -26,14 +26,15 @@ bass: n("-14!16".add(pick(bass_pat, 1))).sc()
   .o(3)
 
 pluck: n("2,-3".add("<7 8>")).sc()
-  .beat("3?",16)
-  .sometimes(x=>x.trans("[7|12]"))
-  .att(0).sus(0).decay(.2)
+  .beat("10?",16)
   .s("gm_recorder")
-  // .rlpf(.7)
+  .att(0).sus(0).decay(.2)
+  .pan(rand)
+  .rlpf(.7)
   .clip(.7)
   .room("1:6")
-  .delay(.8).delaysync(3/8)
+  .delay(.9).delaysync(3/8)
+  .sometimes(trans("12"))
   .o(4)
 
 breaks: s("lqbreaks:6").ifit(2)
