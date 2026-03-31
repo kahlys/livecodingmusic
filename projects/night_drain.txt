@@ -1,4 +1,4 @@
-// @title hypnog @by lou queer
+// @title night drain @by lou queer
 
 setcpm(140/4)
 
@@ -77,8 +77,9 @@ const MELODY = stack(
 
 arp: n("<- - 2 0 - 1 3 2 - 1 - - 4 - 3 0>*16".add(7)).scale(scale)
   .sound("saw")
-  .distort("3:.25:diode")
+  .distort("3:.35:diode")
   .pan(rand)
+  .clip(.7)
   .delay(.7)
   .jux(rev)
   .mask("<0 1 0 0>")
@@ -101,7 +102,27 @@ const SPARKLES = n(irand(32).seg(16).add("0").rib(5, 8))
   .orbit(4)
   //.lpf(4000)
   ._punchcard()
-// sparkles: n(0).scale(scale).sound("triangle")
+const sparkles = n(irand(10).seg(16)).scale(scale)
+  .sound("square")
+  // .sound("wt_digital:5")
+  .delay(perlin.range(0,.7).slow(2))
+  .attack(rand.range(0,.05).fast(8))
+  .sus(rand.fast(8))
+  .distort("10:.3")
+  .hpf(800)
+
+sparkles_normal: sparkles 
+  .lpf(perlin.range(500,2500).slow(4))
+  .fm(perlin.range(0,7).slow(4)).fmh(1)
+
+sparkles_bug: sparkles
+  .fm("100")
+  .fmh("10")
+  .gain(0).almostAlways(x=>x.striate(2).degradeBy(.8).gain(1))
+
+_sparkles_glitched: sparkles
+  .fm("100")
+  .fmh("10")
 
 const MOD_SPARKLES = SPARKLES
   .fm("0 1 2 3 4 5 6 7".slow(4))
