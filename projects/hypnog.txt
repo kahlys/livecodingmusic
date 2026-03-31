@@ -1,0 +1,133 @@
+// @title hypnog @by lou queer
+
+setcpm(140/4)
+
+var scale = "d:iwato"
+
+
+function drumEffects(notes) {
+  return notes.bank("rhythmace")
+  .distort("0.5:1")
+  .lpf(8000)
+}
+
+const KICK = drumEffects(sound("bd").struct("1*<1 2> 0 0 0 0 [[1 0] | [1 0 1 1]]@2 0"))
+  .duck("2:3").duckattack(.1).duckdepth(.3)
+  ._punchcard()
+kick: s("sbd").beat("0,2?.2, 6, 8?,10?",16)
+  .duck("2").duckattack(.2).duckdepth(.7)
+
+const HIGHHAT = drumEffects(sound("hh").struct("1 1*[2|1] 1 1*[2|4]@2 1 1*[3|1] 1"))
+  ._punchcard()
+  
+hh2 : s("tr808_hh!8")
+  .velocity(tri.range(.8,.3).fast(4))
+  .almostNever(ply(2))
+  .delay(.3)
+  .room(.2)
+  .pan(rand)
+  .distort(".5:1:diode")
+  .postgain(.7)
+
+const SNARE = drumEffects(sound("sd").struct("0 0 1 0 0 0 <1 [0 1]> <0 0 [0 0 1]>"))
+  ._punchcard()
+
+snare: s("tr808_rim:1").beat("8",16)
+  .speed(.95)
+  .delay(rand.mul(.7))
+  .delaytime(rand.fast(3).mul(.3))
+  .distort(".5:1:diode")
+
+var bassNotes = n(irand(8).seg(2).sub("10").rib(2, 4))
+//var bassNotes = n("[1 3 4 <7 0>]/2".sub("7"))
+
+const BASS = bassNotes
+  .sound("triangle")
+  .distort("<4:.3 3:.6>")
+  .attack("[<0.2 0.1> 0 .5]/2")
+  .scale(scale)
+  .lpf("200")
+  .orbit(3)
+  ._punchcard()
+bass: n(irand("<1@3 8>").add(-7)).scale(scale).struct("<x@3 x>")
+  .sound("supersaw")
+  // .sound("triangle")
+  .distort("<4:.3:diode 3:.3:diode>")
+  .unison(4)
+  .detune(rand)
+  .lpf(800)
+  .orbit(3)
+  ._punchcard()
+
+const SYNTH = n(irand(10).seg(0.5).add("[0 3]/4").add("0, 2, 4")).scale(scale)
+  .sound("gm_synth_strings_1:2")
+  // .attack("0.4")
+  // .sustain("3")
+  .room("2:3")
+  .distort("3:.2:diode")
+  .lpf(perlin.range(800,8000).fast(16))
+  .orbit(2)
+  ._punchcard()
+synth: SYNTH
+
+const MELODY = stack(
+  "- - [g5 eb6 - eb5] [eb6 - g5 d6] - [- c6 d6 -] - -".slow(2).mask("<0 1 0 0>".slow(2)),
+  "[c6 - - c6] - - [- - d6 -] [- eb6 - -] - - -".slow(2).mask("<0 0 0 1>".slow(2)),
+).note().sound("saw").distort("2:.4").echo(5, 1/8, .6)
+
+arp: n("<- - 2 0 - 1 3 2 - 1 - - 4 - 3 0>*16".add(7)).scale(scale)
+  .sound("saw")
+  .distort("3:.25:diode")
+  .pan(rand)
+  .delay(.7)
+  .jux(rev)
+  .mask("<0 1 0 0>")
+
+const DRUMS = stack(HIGHHAT, SNARE, KICK)
+
+const SPARKLES = n(irand(32).seg(16).add("0").rib(5, 8))
+  //.rib(3, 6)
+  //.rib(5, 8)
+  .sound("triangle")
+  .scale(scale)
+  .attack("<0.03 .05> 0")
+  .sustain("0.4 0.7 1")
+  .distort("10:.1")
+  //.bandf("1046")
+  .lpf("1050")
+  .hpf("900")
+  .bandq("10 1")
+  //.echoWith(4, 3/8, (p,n) => p.add(n*3))
+  .orbit(4)
+  //.lpf(4000)
+  ._punchcard()
+// sparkles: n(0).scale(scale).sound("triangle")
+
+const MOD_SPARKLES = SPARKLES
+  .fm("0 1 2 3 4 5 6 7".slow(4))
+  .fmh("1".slow(4))
+  .lpf("50 100 200 400 800 1000 2000 4000".slow(4))
+
+const CRUNCH_SPARKLES = SPARKLES.fm("100").fmh("10")
+
+_$: arrange(
+  // [32, stack(SYNTH, DRUMS, SPARKLES, BASS, MELODY)],
+  [4, stack(SYNTH)],
+  [2, stack(SYNTH, MOD_SPARKLES, MELODY)],
+  [2, stack(SYNTH, BASS)],
+  [2, stack(SYNTH, CRUNCH_SPARKLES)],
+  [2, stack(SYNTH, BASS)],
+  [2, stack(SYNTH, MOD_SPARKLES, HIGHHAT, BASS)],
+  [2, stack(SYNTH, HIGHHAT, SNARE, BASS)],
+  [2, stack(SYNTH, DRUMS)],
+  [2, stack(SYNTH, DRUMS, BASS)],
+  [2, stack(SYNTH, DRUMS, SPARKLES)],
+  [2, stack(SYNTH, DRUMS)],
+  [2, stack(SYNTH, DRUMS, MOD_SPARKLES)],
+  [2, stack(SYNTH, DRUMS)],
+  [32, stack(SYNTH, DRUMS, SPARKLES, BASS, MELODY)],
+  [8, stack(DRUMS, SYNTH)],
+  [8, stack(KICK, SPARKLES, CRUNCH_SPARKLES, MELODY)],
+  [2, stack(KICK, SNARE, SYNTH, SPARKLES, CRUNCH_SPARKLES)],
+  [8, stack(DRUMS, SYNTH, SPARKLES)],
+)._scope()
