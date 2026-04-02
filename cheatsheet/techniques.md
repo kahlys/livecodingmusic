@@ -17,6 +17,22 @@ Using struct and rand with mul. The rand generates random values between 0 and 1
 Using the almostNever function, it will almost never trigger an event. The ply pattern "2 | 4" means it will repeat 2 or 4times the event.
 - `s("tg33_sh:1").vstruct("<1 .4>*16").almostNever(ply("2 | 4"))`
 
+Perc noises:
+
+```js
+  s("akaixr10_perc")
+  .struct("x*16?0.2")
+  .n(rand.range(1,11).fast(16)).fast(".5|1")
+  .gain(perlin.range(.5,.7).fast(16))
+  .decay(.05)
+  .pan(rand)
+  .jux(rev)
+  .late("[0 0.02]*8")
+  .lpf(rand.rangex(200,20000))
+  .lpq(saw.rangex(1,15).slow(16))
+  .hpf(100)
+```
+
 **Raiser**
 
 - `s("pulse!8").fm(time).fmh(time).room(1).gain(.6)`
