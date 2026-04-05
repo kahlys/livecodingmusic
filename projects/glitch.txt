@@ -3,9 +3,10 @@
 setcpm(140/4)
 
 bass: n("0".add("<0@6 -3 -2>")).s("supersaw,wt_digital").scale("g:minor")
-  .oct(-2)
+  .oct("-1,-2")
   .detune(rand)
-  .lpf(600).lpe(2)
+  .lpf(2000).lpe(1).lpd(3).lpa(.5)
+  .room("1:4")
   .distort("2:.5:diode")
   .o(2)
 
@@ -22,12 +23,11 @@ arp: n("<4@2 3 0 - 4 3 0 - 3@2 4 0 - 3 4 0 - 3@2 0 -1 - 4 0 -3>*8".add("<<0 7>@6
   .fm("<0 1 2 3 4 5 6 7>/4").fmh(1)
   .sometimesBy(.025,x=>x.ply(3).clip(.2).coarse(2))
   .almostNever(x=>x.fmh(1.1))
-  .o(2)
   ._punchcard()
 
-kick: s("tr909_bd").beat("0,7,10?",16).duck("2").duckdepth(.7).duckatt(.2)
+kick: s("sbd").beat("0,2,11?,14?",16).duck("2").duckdepth(.6).duckatt(.1)
 
-rim: s("sr16_sh").beat("8",16).speed(1.2).delay(rand.range(.2,.5)).gain(.7)
+rim: s("sr16_sh").beat("8",16).speed(1.2).delay(rand.range(.4,.7)).gain(.7)
 
 hh: s("tr909_hh").n(4)
   .vstruct("<.6 .8 .5 .6>*16")
