@@ -1,0 +1,56 @@
+// @title singu @by lyse
+
+setCpm(120/4)
+
+arp: note("<f4 a#3 _ - <a#4!10 g#4!10> f#4>*16")
+  .sound("saw")
+  .pan(rand)
+  .att(0.005).dec(0.835).sus(1)
+  .lpf(460).lpe(1.3)
+  .lpa(0.005).lpd(1.72).lps(0.85)
+  .clip(.7)
+  .delay(.7)
+  .room(".7:4")
+  .diode(1)
+  ._punchcard()
+
+bass: note("<[f#2@11 c#3@1.5 c#4@2 a#1@18] [f#2@10 d#3 d#4@1.5 c#3@1.5 a#1@18]>/4")
+  .s("supersaw,wt_digital")
+  .unison(4).detune(rand.range(.1,.4))
+  .att(.05).sus(1).rel(.03)
+  .lpf(1200).lpq(1)
+  .lpe(perlin.range(1,2).fast(16))
+  .lpa(.023).lpd(.38).lps(0)
+  .glide(perlin.range(0,.2).fast(32))
+  // .distort("2:.5:diode")
+  .diode(1)
+  ._punchcard()
+
+kick: s("sbd").beat("0,4,8,<12!3 13>",16).duck("2")
+
+hh: s("tr909_hh:4!16")
+  .pan(rand)
+  .gain(perlin.range(.2,.6).fast(16))
+  .almostNever(x=>x.ply("2"))
+  .speed(0.5)
+  .clip(.4)
+  .lpf(2500).hpf(200)
+  .almostNever(x=>x.coarse(2))
+  .distort("2:.4:diode")
+
+perc1 :s("sergemodular_perc:5").beat("8,11?,13?,14",16)
+  .mask("<1 0 0 0>")
+  .delay(rand.mul(.7))
+  .gain(perlin.range(.8,1).fast(16)).hpf(200)
+
+perc2 :s("tr909_rim:2").beat("8?,11?,13?,14",16)
+  .mask("<0 0 1 0>")
+  .delay(rand.mul(.7))
+  .gain("0 0 0 0 .3 .5 .6 .7")
+  .hpf(600)
+
+// cp1: s("tr909_cp:1").beat("<{4,12}!3 {4,10,12,15}>",16).speed(".9 1.17").gain(.7)
+cp1: s("tr909_cp:1").beat("4,12",16).speed(".9 1.17").gain(.7).delay(.6).delayfb(rand.mul(.6))
+// cp2: s("tr909_cp:3").beat("4",16).gain(.7)
+
+// all(x=>x.scope())
