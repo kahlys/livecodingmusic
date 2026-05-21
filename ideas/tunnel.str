@@ -1,0 +1,18 @@
+// @title tunnel @by lyse
+
+setCpm(120/4)
+setScale("e:minor")
+
+k: s("sbd!4").duck(3)._punchcard()
+hh: s("white!16").dec(tri.range(.05,.1).fast(4)).dly(.8).gain(.2)
+
+bass: n("<0>*16").oct("<-2 <-1 -1 -2>>*16").sc()
+  .s("sawtooth")
+  .acidenv(slider(0.335))
+  .diode(1)
+  .dly(.7)
+  .o(3)
+
+pad : s("tpad:1").scrub(rand.seg("8 4"))
+  .almostNever(x=>x.ply(4))
+  ._punchcard()
