@@ -10,7 +10,7 @@ register('pg', (pgain, x) => {
   return x.mul(postgain(pgain))
 })
 
-window.DX = (env = 8, fm = 2, harm = 2) => s("sine")
+window.DX = (env=8, fm = 2, harm = 2) => s("sine")
   .fm(fm).fmenv(env).fmh(harm).fmdecay(.2)
 
 // tb303 style filter envelope control between 0 & 1 values for useful range
@@ -40,38 +40,34 @@ register('o', (orbit, pat) => {
     return pat
   }
   return pat.hush()
-
+  
 })
 
-Pattern.prototype.col = function (col) {
+Pattern.prototype.col = function(col) {
   const colors = [
     "#50d1f8",
+    "#E91E63",
     "#8EDF5F",
     "#995CD0",
     "#EC7744",
     "#5549B7",
-    "#201D30",
+    "#F9E03D",
+    
   ]
-  if (typeof col === 'number') {
-    // if (col === 0) {
-    //   return this
-    // }
-    // col = col - 1
-    col = colors[col % colors.length]
-  }
-  return this.color(col)
-
+   col = reify(col)
+  const color = pick(colors,col)
+  return this.color(color)
+  
 }
 
 window.CUE = "0"
 
 window.cue = function (...inp) {
-  const index = Math.min(window.CUE, inp.length - 1)
-
-  return reify(inp[index]).col(index)
+  return pick(inp, window.CUE)
 }
+
 window.getCue = () => window.CUE
-window.setCue = function (cue) {
+window.setCue = function(cue) {
   window.CUE = reify(cue)
 }
 Pattern.prototype.cue = function (cues, cb) {
@@ -80,48 +76,48 @@ Pattern.prototype.cue = function (cues, cb) {
   return window.getCue().innerBind(c => {
     return cues.innerBind(cues => {
       cues = [cues].flat()
-      if (cues.includes(c)) {
-
-
+      if(cues.includes(c)) {
+      
+         
         return cb?.(this).col(c) ?? this.col(c)
       } else if (cb == null) {
         return silence
       }
 
       return this.col(c)
-
+      
     })
   })
 
-
+   
 }
 
-Pattern.prototype.oncue = function (cues, cb) {
+Pattern.prototype.oncue = function(cues, cb) {
   cues = reify(cues)
   return window.getCue().innerBind(c => {
-    return cues.innerBind(cues => {
-      cues = [cues].flat();
-      if (!cues.includes(c)) {
-        return this
-      }
-      return cb(this.col(c))
-
-    })
-
+      return cues.innerBind(cues => {
+        cues = [cues].flat();
+        if(!cues.includes(c)) {
+            return this
+        }
+        return cb(this.col(c))
+        
+      })
+    
   })
 }
 
 register('accent', (accent, pat) => {
-  if (accent == 0) {
-    return pat
-  }
-  return pat.mul(velocity(1 + (accent / 8)))
-    .mul(lpenv(1 + (accent / 5))).lpd(.13).lpa(.01)
+   if (accent == 0) {
+     return pat
+   }
+  return pat.mul(velocity(1 + (accent/8)))
+    .mul(lpenv(1 + (accent /5))).lpd(.13).lpa(.01)
 })
 
 
 //tracker style arrangement
-window.track = function (...input) {
+window.track = function(...input) {
   const patterns = input.shift()
   let mods = Array.isArray(input.at(-1)) ? input.pop() : undefined
   if (input.length % 2 !== 0) {
@@ -133,29 +129,29 @@ window.track = function (...input) {
     let inp = [input.at(i)].flat()
     let cycles = inp.at(0);
     let start = inp.at(1) ?? 0
-
+    
     total += cycles;
-
+    
     let cpat = input.at(i + 1).innerBind((str, pat) => {
 
       const pats = []
       str.split(/-+/).forEach((val, index) => {
-        if (val == false) {
-          return
+        if (val == false ){
+        return
         }
         let newPat = patterns.at(index)
-        mods?.forEach(([mod, callback]) => {
-          if (val != mod) {
-            return
-          }
-          newPat = callback(newPat)
-        })
-
-        pats.push(newPat)
+         mods?.forEach(([mod, callback]) => {
+            if (val != mod) {
+              return
+            }
+            newPat = callback(newPat)
+         })
+        
+          pats.push(newPat)
       })
       return stack(...pats)
     });
-
+   
     sects.push([cycles, cpat.ribbon(start, cycles).fast(cycles)]);
   }
   return stepcat(...sects).slow(total);
@@ -183,7 +179,7 @@ $: track(
  *   2, "<g a>(5,8)"
  * ).note()
  */
-window.ar = function (...input) {
+window.ar = function(...input) {
 
   if (input.length % 2 !== 0) {
     throw new Error('Arrange needs a length paramter for each pattern (length, pattern, length, pattern)');
@@ -195,7 +191,7 @@ window.ar = function (...input) {
     let cycles = inp.at(0);
     let start = inp.at(1) ?? 0
     total += cycles;
-
+    
     let pattern = input.at(i + 1);
     sects.push([cycles, pattern.ribbon(start, cycles).fast(cycles)]);
   }
@@ -295,7 +291,7 @@ register('trancegate', (density, seed, length, x) => {
 })
 
 //Better trancegate
-register('tgate', (amt, cycle, length, pat) => {
+register('tgate', (amt, cycle,length, pat) => {
   const cycleSubstitute = new Map([
     [0, 45],
     [1, 116],
@@ -335,22 +331,22 @@ register('tgate', (amt, cycle, length, pat) => {
   ])
   cycle = reify(cycle)
     .withValue(v => {
-      return cycleSubstitute.get(v) ?? v
-    })
+    return cycleSubstitute.get(v) ?? v
+  })
   amt = reify(amt)
-  return pat.struct("x!16".degradeBy(amt.mul(-1).add(1))
-    .rib(cycle, length)).fill().clip(.7)
+   return pat.struct("x!16".degradeBy(amt.mul(-1).add(1))
+    .rib(cycle,length)).fill().clip(.7)
 })
 
 //increasing the delay increases the feedback as well
-register('dly', (amt, x) => {
+register('dly', (amt, x) =>{ 
   amt = reify(amt)
-  return x.delay(amt.mul(.8)).delayfeedback(amt.pow(2)).mask(amt.floor().inv())
+  return  x.delay(amt.mul(.8)).delayfeedback(amt.pow(2)).mask(amt.floor().inv()) 
 })
 
 register('colorparty', (p, pat) => {
-  const colors = ['blue', 'yellow', 'violet', 'green', 'orange', 'cyan', 'magenta', 'white']
-  return pat.color(colors.at(Math.floor(p * colors.length)))
+ const colors = ['blue', 'yellow', 'violet', 'green', 'orange', 'cyan', 'magenta', 'white']
+   return pat.color(colors.at(Math.floor(p * colors.length)))
 })
 
 // quantize notes to given values: pat.grab("e:f#:c")
@@ -404,17 +400,17 @@ register('rlpf', (x, pat) => { return pat.lpf(pure(x).mul(12).pow(4)) })
 register('rhpf', (x, pat) => { return pat.hpf(pure(x).mul(12).pow(4)) })
 
 //@title velocity structure @by Switch Angel
-register('vstruct', (ipat, pat) => {
+register('vstruct', (ipat,pat) => {
   return ipat.outerBind(vel => {
     return pat.keepif.out(Math.ceil(vel)).velocity(vel)
   })
-}, false)
+},false)
 
 // sets my Ableton vocoder CC key to the specified value, probably only useful for me
 
 window.voc = (key) => {
-  let value;
-  switch (key.toLowerCase()) {
+    let value;
+    switch (key.toLowerCase()) {
     case 'c': value = 0; break;
     case 'c#': value = 0.2; break;
     case 'd': value = 0.25; break;
@@ -453,7 +449,7 @@ register('voc', (key, x) => {
   return x.ccn(34).ccv(value).midi('tout');
 });
 
-register('fmtime', (start, length, pat) => {
+register('fmtime', (start,length, pat) => {
   let modu = time.mod(length).add(start)
   return pat.fm(modu).fmh(modu)
 })
@@ -476,9 +472,8 @@ register('acid', (pat) => {
     .lpq(12)
 })
 
-//stext
 //transform text input into synthesis!
-register('stxt', (text, pat) => {
+window.stxt = register('stxt', (text, pat) => {
   const RANGE = 'range'
   const SELECTION = 'selection'
 
@@ -639,38 +634,118 @@ register('stxt', (text, pat) => {
 $: s("brk").sf(2)
 */
 
-Pattern.prototype.sf = function (cycles, segments = 16) {
+Pattern.prototype.sf = function(cycles,segments = 16) {
   cycles = reify(cycles)
   return this.scrub(saw.seg(cycles.mul(segments))).slow(cycles)
     .sustain(1)
 }
 
-register('octave2', (oct, pat) => {
+register('octave', (oct, pat) => {
   const transp = (oct - 3) * 12
   return pat.transpose(transp)
 
 })
 
 window.chordshapes = [
-  "0,4",
-  "0,2,4",
-  "0,4,7,9",
-  "0,2,8,9,11",
-  "0,2,7,8,11",
-  "0,2,4,6",
-  "0,4,6,9",
-  "0,4,7,9,13",
-  "0,2,4,6,8",
-  "0,4,8,9,13",
-]
+  "0,4",             // [0] Power Chord (1-5)
+  "0,2,4",           // [1] Triad (1-3-5)
+  "-7,0,2,4,7",      // [2] Spread Triad
+  "-7,0,2,3,7",      // [3] Spread Sus4/Triad
+  "0,2,4,6",         // [4] 7th Chord
+  "0,2,3,6",         // [5] Minor 7th Cluster
+  "0,4,7,9",         // [6] Open Triad
+  "0,4,7,8",         // [7] Open Suspended Triad
+  "0,4,6,9",         // [8] Open 7th
+  "0,2,6,9",         // [9] Jazz 10th
+  "0,2,6,10",        // [10] 11th Chord
+  "0,2,4,6,8",       // [11] 9th Chord
+  "-7,0,2,6,9",      // [12] Wide 13th
+  "0,4,7,9,13",      // [13] 6/9 Extended
+  "0,4,8,9,13",      // [14] High Tension Extension
+  "0,2,7,8,11",      // [15] High Cluster A
+  "0,2,8,9,11",      // [16] High Cluster B
+  "-7,0,2,3,7",      // [17] Wide Suspended Spread
 
-window.chrd = function (c) {
+  // --- EDM / Melodic House / Future Bass ---
+
+  "0,3,4",           // [18] Sus2 Stack
+  "0,1,4",           // [19] Sus4 Stack
+  "0,2,3,4",         // [20] Dense Triad Cluster
+  "0,2,4,8",         // [21] Add9 Triad
+  "0,2,4,9",         // [22] Add9 + 6
+  "0,4,6,8",         // [23] Soft Major 9
+  "0,2,5,9",         // [24] Dreamy Spread
+  "0,4,7,11",        // [25] Ambient Open Stack
+  "0,7,9,11",        // [26] Fifth + Upper Cluster
+  "0,2,7,11",        // [27] Wide Add9
+  "-7,0,4,7",        // [28] Wide Power Chord
+  "-7,0,4,6",        // [29] Bass + 7th
+  "-7,0,2,9",        // [30] Deep House Voicing
+  "-7,0,4,9",        // [31] Festival House
+  "-7,0,2,4,9",      // [32] Progressive Stack
+  "-7,0,2,4,6,9",    // [33] Full Extended House
+  "-7,0,2,4,8",      // [34] Cinematic Minor Feel
+  "-7,0,3,7,10",     // [35] Suspended Bass Spread
+
+  // --- Future Bass / Porter / Illenium style ---
+
+  "0,2,4,8,11",      // [36] Future Bass Major
+  "0,2,4,6,11",      // [37] Future Bass 11th
+  "0,2,4,9,11",      // [38] Bright Emotional Stack
+  "0,2,6,9,11",      // [39] Lush Extended
+  "0,4,6,8,11",      // [40] Wide Emotional Cluster
+  "0,2,3,7,11",      // [41] Hybrid Cluster
+  "0,1,4,8,11",      // [42] Tension Pad
+  "0,1,2,4,11",      // [43] Massive Cluster
+  "0,2,4,5,9",       // [44] Organic Pad Chord
+  "0,4,5,9,11",      // [45] Shimmer Stack
+
+  // --- Techno / Minimal / Darker voicings ---
+
+  "0,1,4,7",         // [46] Dark Cluster
+  "0,1,3,7",         // [47] Minor Cluster
+  "0,4,5,7",         // [48] Tight Open Chord
+  "0,5,7",           // [49] Quartal Stack
+  "0,5,7,10",        // [50] Quartal 7th
+  "0,5,10",          // [51] Hollow Fifth Stack
+  "-7,0,5,7",        // [52] Wide Quartal
+  "-7,0,1,5",        // [53] Dark Bass Cluster
+  "-7,-3,0,5",       // [54] Industrial Spread
+  "0,1,5,8",         // [55] Acid Tension
+  "0,3,5,8",         // [56] Suspended Dark Chord
+
+  // --- Trance / Uplifting / Big room ---
+
+  "0,2,4,7",         // [57] Big Room Add9
+  "0,4,7,11,14",     // [58] Epic Trance Stack
+  "-7,0,2,4,7,11",   // [59] Huge Spread Stack
+  "0,2,4,6,9,11",    // [60] Full Atmospheric
+  "0,7,11,14",       // [61] Anthem Lead Stack
+  "0,2,9,11,14",     // [62] Emotional Supersaw
+  "-12,0,4,7,11",    // [63] Cinematic Wide Chord
+  "-12,-7,0,4,7",    // [64] Massive Octave Spread
+
+  // --- Experimental / modern electronic ---
+
+  "0,1,2",           // [65] Chromatic Cluster
+  "0,1,2,4",         // [66] Dense Modern Cluster
+  "0,2,3,5,8",       // [67] Floating Ambience
+  "0,4,5,8,9",       // [68] Unresolved Texture
+  "0,2,5,7,11",      // [69] Quartal Hybrid
+  "0,3,7,10,14",     // [70] Cinematic Minor 9
+  "0,2,4,7,9,11",    // [71] Full Lydian Stack
+  "0,1,4,6,11",      // [72] Tension Wash
+  "0,2,6,7,11",      // [73] Poly Cluster
+  "0,4,8,11,14",     // [74] Bright Modern Extension
+];
+
+window.chrd = function(c) {
   c = reify(c)
   return c.outerBind(c => {
     const [degree, variation = 0] = [c].flat()
     const chords = window.chordshapes[Math.min(variation, window.chordshapes.length - 1)]
     return n(chords).add(n(degree))
-  })
+  } )
 }
 
 //@example
@@ -679,11 +754,11 @@ window.chrd = function (c) {
 register(
   'notearp',
   (indices, pat) => pat.arpWith((haps) => reify(indices).fmap((i) => {
-    const transpose = Math.trunc(i / haps.length) * 12
-    let hap = haps[i % haps.length]
-    return hap.withValue(v => {
+     const transpose = Math.trunc(i / haps.length) * 12
+     let hap = haps[i % haps.length]
+    return hap.withValue(v => { 
       let note = v.note ?? 'C3'
-      return { ...v, note: noteToMidi(note) + transpose }
+      return  {...v, note: noteToMidi(note) + transpose}
     })
   })),
   false,
@@ -693,7 +768,7 @@ register(
 //n + defined scale
 Pattern.prototype.nsc = function (pat = 0, oct = 3) {
   pat = reify(pat)
-  return this.set.out(pat.as("n").sc()).octave2(oct);
+  return this.set.out(pat.as("n").sc()).octave(oct);
 };
 
 
@@ -717,16 +792,16 @@ $: s("piano").over(
   n("<-5 -2 -3 -4 0>*2")
 ).scale("g:major:pentatonic")
 */
-Pattern.prototype.over = function (...inp) {
+Pattern.prototype.over = function(...inp) {
   return this.set.out(stack(...inp))
 }
 
-Pattern.prototype.overin = function (...inp) {
+Pattern.prototype.overin = function(...inp) {
   return this.set.in(stack(...inp))
 }
 
 window.sb = register('sb', (p, cb, pat) => {
-  return pat.sometimesBy(p, cb);
+ return pat.sometimesBy(p, cb);
 })
 
 
@@ -737,21 +812,21 @@ window.setScale = (sc) => {
 }
 
 // apply the scale state
-Pattern.prototype.sc = function (mode) {
-  let scale = reify(window.SCALE)
-  if (mode != null) {
-    mode = reify(mode)
-    scale = scale.innerBind(([root]) => {
-      return mode.withValue(m => {
-        return [root, m]
-      })
-    })
-  }
-  return this.scale(scale)
+Pattern.prototype.sc = function(mode) {
+   let scale = reify(window.SCALE)
+   if (mode != null) {
+     mode = reify(mode)
+     scale =  scale.innerBind(([root]) => {
+       return mode.withValue(m => {
+         return [root,m]
+       })
+     })
+   }
+   return this.scale(scale)
 }
 
 register('ifit', (cycles, pat) => {
-  return pat.inside(cycles, fit).slow(cycles).clip(1)
+  return pat.inside(cycles,fit).slow(cycles).clip(1)
 })
 
 // Easy arpeggiating
@@ -762,7 +837,7 @@ $: n(trancearp("<0:2:6@3 2:4:8>", "F@5 B@3", "<1 1 1@2 1 1@2 1>*16"))
   .scale("g:minor").delay(.6)≥
   .s("sawtooth")
 */
-window.trancearp = function (notes, rst = 0, rytm = 0) {
+window.trancearp = function(notes,rst = 0 ,rytm = 0) {
   const rstPresets = [
     "F",
     "B",
@@ -775,9 +850,9 @@ window.trancearp = function (notes, rst = 0, rytm = 0) {
     "x!16",
     "<1 1 _ 1 1 1 1 1>*16",
     "<1 1@2 1 1@2 1 1@2 1 1@2 1 1 1 1>*16",
-
+    
   ]
-
+  
   if (typeof rst == 'number') {
     rst = pickmod(rstPresets, rst)
   }
@@ -790,7 +865,7 @@ window.trancearp = function (notes, rst = 0, rytm = 0) {
     // F: saw.mod(16).mul(16),
     // B: isaw.mod(16).mul(16),
   }
-
+  
   return pickmod(notes, pickRestart(pats, rst)).struct(rytm)
   // .restart(rst)
 }
@@ -801,7 +876,7 @@ window.trancearp = function (notes, rst = 0, rytm = 0) {
 window._comb = register('comb', (inp, pat) => {
   let [delay, feedback = .6] = [inp].flat()
   delay = reify(delay).div(100)
-
+  
   return pat.FX(K(() => {
     const d = S(delay);
     const q = S(feedback);
@@ -817,8 +892,8 @@ window._comb = register('comb', (inp, pat) => {
 // SOUNDS
 
 
-registerFunc('noisehat', (seg = 16, modu = tri, speed = 4, min = .05, max = .12) => s('white').seg(seg).dec(modu.fast(4).range(min, max)))
-registerFunc('zap', (amount = .8, speed = .1, note = 'c3',) => s("sine").penv(reify(amount).mul(120)).note(note).pdec(speed).dec(speed).o(8))
+registerFunc('noisehat', (seg = 16, modu = tri, speed = 4, min = .05, max = .12) => s('white').seg(seg).dec(modu.fast(4).range(min,max)))
+registerFunc('zap', (amount = .8, speed = .1,note = 'c3', ) => s("sine").penv(reify(amount).mul(120)).note(note).pdec(speed).dec(speed).o(8))
 window.roller = (wt = 0) => s("wt_digi")
   .wt(wt).wtenv(0).wtdecay(.2).warp(0).warpmode(7).warpenv(.5).warpdec(.1)
   .dec(.2).lpq(0).dly(.8).room(.7).roomsize(4).diode("1").acidenv(.44)
@@ -834,80 +909,80 @@ window.spinor = (alive = 1, dead = 0) => s("wt_digital").lfo({ dr: 0.05 })
 
 window.roller2 = (acidenv = .5) => {
   return s("bstab:1:.6,supersaw:1:.6,white:0:.3").detune(rand)
-    .begin("<0 .02>/4").room(.5).acidenv(acidenv).lpq(0).postgain(1.2).diode([2.5, .6])
-    .sustain(.45).dec(.2)
+    .begin("<0 .02>/4").room(.5).acidenv(acidenv).lpq(0).postgain(1.2).diode([2.5,.6])
+  .sustain(.45).dec(.2)
 }
 
 //Custom UI Elements
 
-window.UISlider = function (cb, id, initVal = .5, containerStyle = {}) {
+window.UISlider = function(cb, id, initVal= .5, containerStyle = {}) {
 
-  let sliderContainer = document.getElementById(id)
-  if (sliderContainer) {
-    sliderContainer.remove()
-  }
-  sliderContainer = document.createElement('div');
-  sliderContainer.id = id;
-
+    let sliderContainer = document.getElementById(id)
+    if (sliderContainer) {
+      sliderContainer.remove()
+    }
+    sliderContainer = document.createElement('div');
+    sliderContainer.id =  id;
+  
   sliderContainer.className = 'right-0 bg-lineHighlight border border-muted'
   Object.assign(sliderContainer.style, {
-    position: 'fixed',
-    bottom: '40px',
-    zIndex: '9999',
-    padding: '2px 8px',
+        position: 'fixed',
+        bottom: '40px',
+        zIndex: '9999',
+        padding: '2px 8px',
+        
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+       ...containerStyle
+    });
 
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '5px',
-    ...containerStyle
-  });
+    const label = document.createElement('label');
+    label.innerText = id + ': ' + initVal;
+    
+    label.className = 'text-foreground font-mono'
 
-  const label = document.createElement('label');
-  label.innerText = id + ': ' + initVal;
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = 0;
+    slider.max = 1;
+    slider.step = 0.01
+    slider.value = initVal;
+    slider.style.cursor = 'pointer';
 
-  label.className = 'text-foreground font-mono'
-
-  const slider = document.createElement('input');
-  slider.type = 'range';
-  slider.min = 0;
-  slider.max = 1;
-  slider.step = 0.01
-  slider.value = initVal;
-  slider.style.cursor = 'pointer';
-
-  slider.addEventListener('input', (e) => {
-    const value = parseFloat(e.target.value)
-    label.innerText = id + ': ' + value;
-    cb(value, e)
-
-
-  });
-
-  sliderContainer.appendChild(label);
-  sliderContainer.appendChild(slider);
-  document.body.appendChild(sliderContainer);
+    slider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value)
+        label.innerText = id + ': ' + value;
+         cb(value, e)
+      
+       
+    });
+    
+    sliderContainer.appendChild(label);
+    sliderContainer.appendChild(slider);
+    document.body.appendChild(sliderContainer);
 }
 
 
 window.UISlider(
   (v, e) => {
-    const controller = getSuperdoughAudioController()
-    const nodes = controller.nodes
-    Array.from(Object.values(nodes)).forEach(node => {
-      node.getDjf?.(v)
-    })
-  },
-  'djfilt', .5, { right: '144px' })
+  const controller = getSuperdoughAudioController()
+  const nodes = controller.nodes
+  Array.from(Object.values(nodes)).forEach(node => {
+    node.getDjf?.(v)
+  })
+},
+'djfilt', .5, {right: '144px'})
 
 window.UISlider(
   (v, e) => {
-    const controller = getSuperdoughAudioController()
-    const nodes = controller.nodes
-    Array.from(Object.values(nodes)).forEach(node => {
-      node.summingNode.gain.setValueAtTime(v, 0)
-    })
-  },
-  'Volume', .8)
+  const controller = getSuperdoughAudioController()
+  const nodes = controller.nodes
+  Array.from(Object.values(nodes)).forEach(node => {
+   node.summingNode.gain.setValueAtTime(v, 0)
+  })
+},
+'Volume', .8)
 
 // GLOSSING FUNCTIONS <3 these are pulled from Glossing's repo: 
 // https://codeberg.org/glossing/Strudel_Scripts
@@ -936,7 +1011,7 @@ window.up = register(
             Object.entries(vNew).filter(([_, val]) => val !== undefined)
           );
           return { ...v, ...vUp };
-        }
+        } 
       )
       .appBoth(vals),
   false,
@@ -1006,11 +1081,11 @@ register(
           const freqF = getFrequencyFromValue(value, value.s === 'sbd' ? 29 : 36); // target
           const freqI = prev.length
             ? prev.reduce((closest, v) => {
-              const phase = glideT > 0 ? Math.min((t - v.t) / glideT, 1) : 1;
-              const cand = v.freqI + phase * (v.freqF - v.freqI);
-              if (closest == null) return cand;
-              return Math.abs(cand - freqF) < Math.abs(closest - freqF) ? cand : closest;
-            }, null)
+                const phase = glideT > 0 ? Math.min((t - v.t) / glideT, 1) : 1;
+                const cand = v.freqI + phase * (v.freqF - v.freqI);
+                if (closest == null) return cand;
+                return Math.abs(cand - freqF) < Math.abs(closest - freqF) ? cand : closest;
+              }, null)
             : freqF;
           if (trig) {
             curr.push({ freqI, freqF, t });
@@ -1129,15 +1204,15 @@ Pattern.prototype.bend = function (bends = 0, speedUp = 0.05, speedDown = 0.05) 
   speedDown = reify(speedDown);
   // Create the bending pattern and make it play by tagging it with `p`
   bends.fmap((b) => (su) => (sd) => ({
-    s: 'one',
-    attack: su,
-    release: sd,
-    bus: uuid,
-    sustain: 1,
-    dry: 0,
-    gain: __semitoneBend ** b - 1,
-    dc: 0,
-  })).appBoth(speedUp).appBoth(speedDown)
+      s: 'one',
+      attack: su,
+      release: sd,
+      bus: uuid,
+      sustain: 1,
+      dry: 0,
+      gain: __semitoneBend ** b - 1,
+      dc: 0,
+    })).appBoth(speedUp).appBoth(speedDown)
     .p('bend_' + uuid);
   // Modulate the original pattern
   return this.bmod({ c: 's', b: uuid, dr: 1 });
