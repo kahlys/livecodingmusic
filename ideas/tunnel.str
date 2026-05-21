@@ -3,7 +3,11 @@
 setCpm(120/4)
 setScale("e:minor")
 
-k: s("sbd!4").duck(3)._punchcard()
+kick: s("sbd!4").duck(3)
+
+kick_extra: s("sbd")
+  .struct("<-!14 [- x x x]!2>*4").gain(.6)
+  ._punchcard()
 hh: s("white!16").dec(tri.range(.05,.1).fast(4)).dly(.8).gain(.2)
 
 bass: n("<0>*16").oct("<-2 <-1 -1 -2>>*16").sc()
@@ -13,6 +17,6 @@ bass: n("<0>*16").oct("<-2 <-1 -1 -2>>*16").sc()
   .dly(.7)
   .o(3)
 
-pad : s("tpad:1").scrub(rand.seg("8 4"))
+pad : s("lpad:0").scrub(rand.seg("8 4"))
   .almostNever(x=>x.ply(4))
   ._punchcard()
