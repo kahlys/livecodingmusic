@@ -1,0 +1,42 @@
+//@title rough pegging @by lyse
+
+setCpm(136/4)
+setScale("f:minor")
+setCue(0)
+
+lead: note(irand(54).add(30).grab("f:g:g#:c:c#").seg(16).rib(4,2))
+  .s("wt_digital")
+  .acidenv(slider(0.412))
+  .wtdepth(.4)
+  .lpa(.5)
+  .lpq(7)
+  .unison(4)
+  .detune(rand)
+  .dly(slider(0.293))
+  .transient(.2)
+  .diode("4:.5")
+  .o(4)
+  ._punchcard()
+
+bass: note("f1!16").s("sawtooth,wt_digital")
+  .acidenv(slider(0.323))
+  .unison(2)
+  .dec(.13)
+  .wt(0).wtenv(.7)
+  .diode("4:.5")
+  .fm(time.mod("<1 _ _ 2>"))
+  .o(3)
+  ._scope({width:1400})
+
+kick: s("sbd tr909_cp".fast(2))
+  .duck("3:4")
+  .duckdepth(.9)
+  .duckatt(.2)
+  .oncue("0", x=>x.rib(0,1/4))
+
+top: s("ltop:18").ifit(8).rib(0,4).gain(.8)
+
+_riser: s("pulse!16").dec(tri.mul(.3).fast(4))
+  .delay(0)
+  .fm(time).fmtime(16,64).gain(.7)
+  ._scope({width:1400})
