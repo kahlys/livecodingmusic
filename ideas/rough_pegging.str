@@ -26,6 +26,7 @@ bass: note("f1!16").s("sawtooth,wt_digital")
   .diode("4:.5")
   .fm(time.mod("<1 _ _ 2>"))
   .o(3)
+  .oncue(2, x => x.struct("x@8").dec(.9))
   ._scope({width:1400})
 
 kick: s("sbd tr909_cp".fast(2))
