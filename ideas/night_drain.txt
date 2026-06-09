@@ -154,6 +154,7 @@ Sfinal: ar(
   4, stack(myKICK, mySNARE, bass_calm, SYNTH, arp),
   4, stack(myKICK, mySNARE, myHH, bass, SYNTH, arp, sparkles_bug),
   32, stack(myKICK, mySNARE, myHH, bass, SYNTH, arp, sparkles_normal),
+  16, stack(myKICK, mySNARE, myHH, bass, SYNTH, arp, sparkles_normal, sparkles_bug),
   4, stack(myKICK, bass_calm, SYNTH),
 )
   // .rib(4,4)
