@@ -1,6 +1,7 @@
 // @title night drain @by lou queer
 
 setcpm(140/4)
+setScale("d:iwato")
 
 var scale = "d:iwato"
 
@@ -26,6 +27,8 @@ const kick = s("sbd")
 
 const myKICK = kick
 
+kk: myKICK
+
 const HIGHHAT = drumEffects(sound("hh").struct("1 1*[2|1] 1 1*[2|4]@2 1 1*[3|1] 1"))
   ._punchcard()
   
@@ -38,6 +41,8 @@ const myHH = s("tr909_hh!8").n("<0 1>*4")
   .distort(".5:1:diode")
   .postgain(.7)
 
+liveHH: myHH
+
 const SNARE = drumEffects(sound("sd").struct("0 0 1 0 0 0 <1 [0 1]> <0 0 [0 0 1]>"))
   ._punchcard()
 
@@ -48,9 +53,11 @@ const snare = s("tr808_rim:1")
   .delay(rand.mul(.7))
   .delaytime(rand.fast(3).mul(.3))
   .distort(".5:1:diode")
-  .postgain(1.2)
+  // .postgain(1.2)
 
 const mySNARE = snare
+
+liveSNARE: snare
 
 var bassNotes = n(irand(8).seg(2).sub("10").rib(2, 4))
 //var bassNotes = n("[1 3 4 <7 0>]/2".sub("7"))
@@ -63,16 +70,30 @@ const BASS = bassNotes
   .lpf("200")
   .orbit(3)
   ._punchcard()
-const bass = n(irand("<1@3 8>").add(-7)).scale(scale).struct("<x@3 x>")
+const pedal = n(irand("<1@3 8>").add(7)).sc().struct("<x@3 x>")
   .sound("supersaw")
-  // .sound("triangle")
-  .diode("<4 3>:.3")
+  .diode(1)
+  .lpa(0.3)
   .unison(4)
   .detune(rand)
   .lpf(800)
   .orbit(3)
-  ._punchcard()
+
+_myPEDAL: pedal
+
+// const bass = n(irand("<1@3 8>")).sc().struct("<x@3 x>")
+const bass = n("<0@3 1 -1@3 -2 -3@3 1>").oct(-1).sc()
+  .sound("supersaw")
+  // .sound("triangle")
+  // .diode("<4 3>:.35")
+  .unison(4)
+  .detune(rand)
+  .lpf(800)
+  .orbit(3)
+  ._punchcard({labels:true})
 const bass_calm = bass.diode("3:.3")
+
+live_bass: bass_calm
 
 const SYNTH = n(irand(10).seg(0.5).add("[0 3]/4").add("0, 2, 4")).scale(scale)
   .sound("gm_synth_strings_1:2")
@@ -82,8 +103,19 @@ const SYNTH = n(irand(10).seg(0.5).add("[0 3]/4").add("0, 2, 4")).scale(scale)
   .distort("3:.2:diode")
   .lpf(perlin.range(800,8000).fast(16))
   .orbit(2)
-  ._punchcard()
-synth: SYNTH
+  ._punchcard({labels: true})
+
+const SYNTH2 = n("0".add("<0 3 2 5>/2").add("0, 2, 4")).sc()
+  .sound("gm_synth_strings_1:2")
+  // .attack("0.4")
+  // .sustain("3")
+  .room("2:3")
+  .distort("3:.2:diode")
+  .lpf(perlin.range(800,8000).fast(16))
+  .orbit(2)
+  ._punchcard({labels: true})
+
+synth: SYNTH2
 
 const MELODY = stack(
   "- - [g5 eb6 - eb5] [eb6 - g5 d6] - [- c6 d6 -] - -".slow(2).mask("<0 1 0 0>".slow(2)),
@@ -97,7 +129,10 @@ const arp = n("<- - 2 0 - 1 3 2 - 1 - - 4 - 3 0>*16".add(7)).scale(scale)
   .clip(.7)
   .dly(.7)
   // .jux(rev)
+  .acidenv(slider(0.72))
   .mask("<0 1 0 0>")
+
+liveARP: arp
 
 const DRUMS = stack(HIGHHAT, SNARE, KICK)
 
@@ -130,6 +165,7 @@ const sparkles_discrete = sparkles.lpf(50).fm(0).fmh(1).hpf(900).distort("10:.1"
 
 const sparkles_normal = sparkles 
   .lpf(perlin.range(500,2500).slow(4))
+  // .acidenv(perlin.range(.2,.8).slow(4))
   .fm(perlin.range(0,7).slow(4)).fmh(1)
 
 const sparkles_bug = sparkles
@@ -141,6 +177,9 @@ const sparkles_glitched = sparkles
   .fm("100")
   .fmh("10")
 
+liveSPARKLES: stack(sparkles_normal, sparkles_bug)
+  ._punchcard()
+
 const MOD_SPARKLES = SPARKLES
   .fm("0 1 2 3 4 5 6 7".slow(4))
   .fmh("1".slow(4))
@@ -149,7 +188,7 @@ const MOD_SPARKLES = SPARKLES
 const CRUNCH_SPARKLES = SPARKLES.fm("100").fmh("10")
 
 
-Sfinal: ar(
+_final: ar(
   4, stack(myKICK, bass_calm, SYNTH),
   4, stack(myKICK, mySNARE, bass_calm, SYNTH, arp),
   4, stack(myKICK, mySNARE, myHH, bass, SYNTH, arp, sparkles_bug),
