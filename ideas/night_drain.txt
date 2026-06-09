@@ -135,7 +135,7 @@ const sparkles_normal = sparkles
 const sparkles_bug = sparkles
   .fm("100")
   .fmh("10")
-  .gain(0).almostAlways(x=>x.striate(2).degradeBy(.8).gain(1))
+  .gain(0).almostAlways(x=>x.striate(2).degradeBy(.8).gain(.8))
 
 const sparkles_glitched = sparkles
   .fm("100")
