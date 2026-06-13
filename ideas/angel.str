@@ -1,0 +1,63 @@
+// @title angel @by lyse 
+
+setCpm(140/4)
+setScale("f:minor")
+
+const bass_line = "<[3 5@15] [3@12 0@4] [5 7@15] 4>"
+
+const bass_struct = `<
+  1 1@3 1@2 1 1@2 1 1@2 1 1@2 1
+  1 1@3 1@2 1 1@2 1 1@2 1 1 1 1
+  1 1@2 1 1@2 1 1@2 1 1@2 1 1@2 1
+  1 1 1 1 1@2 1 1@2 1 1@2 1 1 1@2
+  >*16`
+
+BASS: n(bass_line).struct(bass_struct).oct(-2).sc()
+  .s("supersaw")
+  .detune(.7).unison(5)
+  .clip(.8)
+  .acidenv(slider(.38))
+  .pg(1)
+  .diode(1)
+  .o(3)
+  ._pianoroll()
+
+BASSLAYER: n(bass_line.sub("<3 0 3 2>/2")).struct(bass_struct).sc()
+  .s("supersaw,white:0:.2")
+  .detune(.2).unison(5)
+  .clip(.8)
+  .acidenv(slider(.38))
+  .dly(slider(0.221))
+  .room(slider(0.848)).roomsize(4)
+  .diode(1)
+  .wt(0)
+  .almostNever(x=>x.oct(1))
+  .o(3)
+  ._pianoroll()
+
+const lead_line = `<
+  [0,6] [[0,7]@3 [0,4]] [2,9] [[2,8]@2 [0,4] [[2,6] [2,7]]]
+  [2,7] [[0,7]@3 [0,4]] [2,9] [[2,8]@2 [0,4] [[2,6] [2,8]]]
+>`
+
+LEAD: n(lead_line).sc().notearp("< - 0 1@2 0 1 0 1>*16")
+  .s("sawtooth,white:0:.4")
+  .detune(.3).unison(1)
+  .pan(rand)
+  .fm(slider(0)).fmwave("white")
+  .acidenv(slider(0.25).add(tri.div(5).slow(20)))
+  .lpd(.2)
+  .fill()
+  .diode(1)
+  .dly(slider(.5)).delayfb(.8)
+  .room(slider(0.556)).roomsize(4)
+  .almostNever(x=>x.oct(1))
+  .o(5)
+  ._pianoroll()
+KICK: s("sbd!4")
+  .duck("3:4:5").duckdepth(.7).duckatt(.2)
+  ._scope()
+CLAP: s("tr909_cp:2").struct("<- 1>*4").almostNever(x=>x.ply(2)).postgain(.8)
+
+HAT: s("white!16").dec(tri.range(.05,.15).fast(4)).gain(.5)
+  .hpf(1200).transient(".2").pan(rand.range(.2,.8))
