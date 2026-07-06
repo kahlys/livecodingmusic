@@ -33,7 +33,7 @@ const bass = note("0!16").sc().oct(-2)
 dual: stack(
   lead.acidenv(.7).mask("<1 0>*2"),
   bass.acidenv(.7).mask("<0 1>*2"),
-)
+).dly(.7)
 
 kick: s("sbd tr909_cp:1".fast(2))
   .duck("3:4")
