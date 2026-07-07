@@ -1,0 +1,54 @@
+// @title femcurse @by lyse 
+
+setCpm(140/4)
+setScale("d:minor")
+
+const bass_note = n("<0 2 -2 -3>").sc().oct(-1).struct("x!4")
+  ._pianoroll({width:1400})
+
+bass_soft: bass_note
+  .s("supersaw")
+  .crush(7)
+  .gain(1.2)
+  .o(3)
+
+_bass_hard: bass_note
+  .s("wt_digital")
+  .unison(1).detune(.1)
+  .wt(.3).wt("<.4 .2 .6 .4>")
+  .crush(6)
+  .diode("2:.7")
+  .o(3)
+
+pads: chord("Dm7@2 Bb^7 Am").voicing().slow(8)
+  .s("supersaw")
+  .unison(12)
+  .detune(.4)
+  .o(3).duckatt(.06)
+  ._pianoroll({width:1400})
+
+arp: n("<0 4 3 7>*16".add("2 6 8 4")).scale("d:minor:pentatonic")
+  .s("supersaw")
+  .unison(4).detune(.7)
+  .acidenv(slider(0.709))
+  .dly(slider(0.617))
+._pianoroll({width:1400})
+
+mel: n("<<0 6 2 8> 6 1 7 4 <7 2> 6 2>*8").scale("d:minor:pentatonic")
+  .s("supersaw")
+  .unison(4).detune(.7)
+  .dec(.13).clip(.9)
+  .fm(7).fmh(2)
+  .acidenv(slider(0.563))
+  .dly(slider(0.679))
+  .dist(1)
+  .degradeBy(.4)
+  ._pianoroll({width:1400})
+
+kick: s("sbd!4")
+  .sometimesBy(.2, x => x.ply("2")).rib(1, 4)
+  .duck("3").duckatt(.1)
+
+hh: s("tr909_hh!8").degradeBy(.2).trans(4)
+
+oh: s("tr909_oh:3").struct("<- x>*8").trans(4)
