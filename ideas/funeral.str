@@ -1,4 +1,4 @@
-// @title femcurse @by lyse 
+// @title funera-l @by lyse 
 
 setCpm(140/4)
 setScale("d:minor")
@@ -6,16 +6,16 @@ setScale("d:minor")
 const bass_note = n("<0 2 -2 -3>").sc().oct(-1).struct("x!4")
   ._pianoroll({width:1400})
 
-bass_soft: bass_note
+_bass_soft: bass_note
   .s("supersaw")
   .crush(7)
   .gain(1.2)
   .o(3)
 
-_bass_hard: bass_note
+bass_hard: bass_note
   .s("wt_digital")
   .unison(1).detune(.1)
-  .wt(.3).wt("<.4 .2 .6 .4>")
+  .wt(.3).wtenv("<.4 .2 .6 .4>")
   .crush(6)
   .diode("2:.7")
   .o(3)
@@ -27,22 +27,22 @@ pads: chord("Dm7@2 Bb^7 Am").voicing().slow(8)
   .o(3).duckatt(.06)
   ._pianoroll({width:1400})
 
-arp: n("<0 4 3 7>*16".add("2 6 8 4")).scale("d:minor:pentatonic")
+arp: n("<0 4 3 7>*16".add("0 2 4 8")).scale("d:minor:pentatonic")
   .s("supersaw")
   .unison(4).detune(.7)
   .acidenv(slider(0.709))
   .dly(slider(0.617))
 ._pianoroll({width:1400})
 
-mel: n("<<0 6 2 8> 6 1 7 4 <7 2> 6 2>*8").scale("d:minor:pentatonic")
+mel: n("<<0 6 2 8> 6 1 7 4 <7 2> 6 2>*8".add("0 2 4 8")).sc()
   .s("supersaw")
   .unison(4).detune(.7)
   .dec(.13).clip(.9)
-  .fm(7).fmh(2)
-  .acidenv(slider(0.563))
-  .dly(slider(0.679))
-  .dist(1)
-  .degradeBy(.4)
+  .fm("<4 7 12 16 8>*8").fmh(2)
+  .acidenv(slider(0.688))
+  .dly(slider(0.7))
+  .diode(1)
+  // .degradeBy(.4)
   ._pianoroll({width:1400})
 
 kick: s("sbd!4")
