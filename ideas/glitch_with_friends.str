@@ -1,0 +1,49 @@
+// @title glitch with friends @by lyse
+
+samples('github:kyrsive/minikit-samples')
+samples('github:kyrsive/gc-wavetables')
+
+setCpm(120 / 4)
+setScale("e:minor")
+
+arp: n("<0 2 1 5 4>*4").sc().s("wt_glitchcool:54").unison(4).detune(rand).phaser("<1 2 4 8>")
+    .trancegate(1, 4, 3)
+    .fmwave("square").fm("<0 2 16 8 0 4>*4")
+    .acidenv(slider(0.709))
+    .delay(".5".add(tri.mul(.3).slow(8)))
+    .diode(1)
+    ._pianoroll()
+
+pads: chord("Em@2").voicing().slow(8)
+    .s("supersaw")
+    .unison(12)
+    .detune(.4)
+    .o(3)
+    ._pianoroll({ width: 1400 })
+
+bass: n("<5 [3@12 0@4] 7 4>").oct(-2).sc().s("supersaw")
+    .unison(4).detune(.7)
+    .diode("3:.5")
+    .acidenv(slider(0.813))
+    .o(3)
+    ._pianoroll()
+layer: n("<5 [3@12 0@4] 7 4>").sc().trancegate(1, 4, 3).s("wt_glitchcool:1,white:0:.2")
+    .detune(.2).unison(5)
+    .clip(.8)
+    .acidenv(slider(0.563))
+    .dly(slider(0.637))
+    .room(slider(0.598)).roomsize(4)
+    .diode(1)
+    .wt(0)
+    .almostAlways(x => x.oct(1))
+    .o(3)
+    ._pianoroll()
+
+kick: s("sbd!4")
+    .duck("3").duckatt(.1).duckdepth(.7)
+    ._pianoroll()
+
+tt: s("t_breaks:2").ifit(2).o(3)._pianoroll()
+
+top: s("t_breaks:1").ifit(2).gain(.7).hpf(600)
+    .o(3)._pianoroll()
