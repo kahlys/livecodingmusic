@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Audio Explorer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #24292e;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    details {
+      margin-left: 16px;
+      margin-top: 6px;
+    }
+
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px;
+      background: #eee;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      width: fit-content;
+    }
+
+    summary:hover {
+      background: #ddd;
+    }
+
+    .audio-item {
+      background: white;
+      padding: 10px;
+      margin: 6px 0 6px 16px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .file-name {
+      font-size: 0.9rem;
+      min-width: 150px;
+      flex: 1;
+      word-break: break-all;
+    }
+
+    audio {
+      height: 32px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>GitHub Audio Folder Explorer</h1>
+  <div class="search-box">
+    <input type="text" id="repoUrl" value="https://github.com/kyrsive/minikit-samples"
+      placeholder="GitHub repository link">
+    <button onclick="fetchAudioFiles()">Explore</button>
+  </div>
+
+  <div id="status" class="status"></div>
+  <div id="tree-container"></div>
+
+  <script>
+    async function fetchAudioFiles() {
+      const url = document.getElementById('repoUrl').value.trim();
+      const statusDiv = document.getElementById('status');
+      const container = document.getElementById('tree-container');
+
+      statusDiv.textContent = "";
+      container.innerHTML = "";
+
+      const regex = /github\.com\/([^/]+)\/([^/]+)/;
+      const match = url.match(regex);
+
+      if (!match) {
+        statusDiv.textContent = "Invalid GitHub URL.";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      const [_, owner, repo] = match;
+      statusDiv.textContent = "Generating file tree...";
+      statusDiv.style.color = "orange";
+
+      try {
+        const repoInfoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+        if (!repoInfoResponse.ok) throw new Error("Repository not found or private.");
+        const repoInfo = await repoInfoResponse.json();
+        const defaultBranch = repoInfo.default_branch;
+
+        const treeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`);
+        if (!treeResponse.ok) throw new Error("Unable to read the repository structure.");
+        const treeData = await treeResponse.json();
+
+        const wavFiles = treeData.tree.filter(file => file.type === "blob" && file.path.toLowerCase().endsWith('.wav'));
+
+        if (wavFiles.length === 0) {
+          statusDiv.textContent = "No .wav files found.";
+          statusDiv.style.color = "black";
+          return;
+        }
+
+        const rootStructure = {};
+
+        wavFiles.forEach(file => {
+          const parts = file.path.split('/');
+          let currentLevel = rootStructure;
+
+          parts.forEach((part, index) => {
+            const isFile = (index === parts.length - 1);
+
+            if (!currentLevel[part]) {
+              currentLevel[part] = isFile ? file : {};
+            }
+            currentLevel = currentLevel[part];
+          });
+        });
+
+        statusDiv.textContent = `${wavFiles.length} samples successfully loaded! Click on folders to explore.`;
+        statusDiv.style.color = "green";
+
+        renderTree(rootStructure, container, owner, repo, defaultBranch);
+
+      } catch (error) {
+        statusDiv.textContent = `Error: ${error.message}`;
+        statusDiv.style.color = "red";
+      }
+    }
+
+    function renderTree(structure, parentElement, owner, repo, branch, currentPath = "") {
+      for (const key in structure) {
+        const element = structure[key];
+        const newPath = currentPath ? `${currentPath}/${key}` : key;
+
+        if (element.path) {
+          const fileUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${element.path}`;
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'audio-item';
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'file-name';
+          nameSpan.textContent = key;
+
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.preload = "none";
+          audio.src = fileUrl;
+
+          itemDiv.appendChild(nameSpan);
+          itemDiv.appendChild(audio);
+          parentElement.appendChild(itemDiv);
+        }
+        else {
+          const details = document.createElement('details');
+          const summary = document.createElement('summary');
+          summary.textContent = `📁 ${key}`;
+
+          details.appendChild(summary);
+
+          renderTree(element, details, owner, repo, branch, newPath);
+          parentElement.appendChild(details);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
