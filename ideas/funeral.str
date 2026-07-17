@@ -1,18 +1,21 @@
 // @title funera-l @by lyse 
 
+samples('github:yaxu/clean-breaks')
+samples('github:switchangel/breaks')
+
 setCpm(140/4)
 setScale("d:minor")
 
 const bass_note = n("<0 2 -2 -3>").sc().oct(-1).struct("x!4")
   ._pianoroll({width:1400})
 
-_bass_soft: bass_note
+const BASS_SOFT = bass_note
   .s("supersaw")
   .crush(7)
-  .gain(1.2)
+  .gain(1.4)
   .o(3)
 
-bass_hard: bass_note
+const BASS_HARD = bass_note
   .s("wt_digital")
   .unison(1).detune(.1)
   .wt(.3).wtenv("<.4 .2 .6 .4>")
@@ -20,35 +23,62 @@ bass_hard: bass_note
   .diode("2:.7")
   .o(3)
 
-pads: chord("Dm7@2 Bb^7 Am").voicing().slow(8)
+
+
+const PAD = chord("Dm7@2 Bb^7 Am").voicing().slow(8)
   .s("supersaw")
   .unison(12)
   .detune(.4)
   .o(3).duckatt(.06)
   ._pianoroll({width:1400})
 
-arp: n("<0 4 3 7>*16".add("0 2 4 8")).scale("d:minor:pentatonic")
+const ARP = n("<0 4 3 7>*16".add("0 2 4 8")).scale("d:minor:pentatonic")
   .s("supersaw")
-  .unison(4).detune(.7)
-  .acidenv(slider(0.709))
-  .dly(slider(0.617))
+  .unison(12).detune(.7)
+  .dec(.20)
+  .acidenv(slider(0.75))
+  .dly(slider(0.658))
+  .diode("1:.75")
 ._pianoroll({width:1400})
 
-mel: n("<<0 6 2 8> 6 1 7 4 <7 2> 6 2>*8".add("0 2 4 8")).sc()
-  .s("supersaw")
-  .unison(4).detune(.7)
-  .dec(.13).clip(.9)
-  .fm("<4 7 12 16 8>*8").fmh(2)
-  .acidenv(slider(0.688))
-  .dly(slider(0.7))
+const MELODY = n("<<0 6 2 8> 6 1 7 4 <7 2> 6 2>*8".add("0 2 4 8")).sc()
+  .s("square")
+  .unison(4).detune("<0 200>")
+  .fmwave("square").fm(.5).fmenv(.1)
+  .dec(.20)
+  // .fm("<4 7 12 16 8>*8").fmh(2)
+  .acidenv(slider(0.459))
+  .dly(slider(0.637))
   .diode(1)
-  // .degradeBy(.4)
   ._pianoroll({width:1400})
 
-kick: s("sbd!4")
-  .sometimesBy(.2, x => x.ply("2")).rib(1, 4)
-  .duck("3").duckatt(.1)
+const MELODY_DEG = MELODY.degradeBy(.4)
 
-hh: s("tr909_hh!8").degradeBy(.2).trans(4)
+const KICK = s("sbd!4")
+  .duck("3")
+  .duckdepth(.6)
+  .duckatt(.1)
 
-oh: s("tr909_oh:3").struct("<- x>*8").trans(4)
+const KICK_HARD = KICK.sometimesBy(.2, x => x.ply("2")).rib(1, 4)
+
+const HH = s("tr909_hh:4!8").degradeBy(.2).trans(4)
+
+const OH = s("tr909_oh:6").struct("<- x>*8").trans(4)
+
+const DRUMS = s("action/1").fit()
+  .o(3)
+  .scrub(irand(8).div(16).seg(8)).sometimesBy(.2, x => x.ply("2"))
+  .rib(8,4)
+  ._pianoroll()
+S$: arrange(
+  [4, stack(MELODY                                                   )],
+  [8, stack(MELODY,          BASS_SOFT                               )],
+  [8, stack(MELODY,          BASS_SOFT, PAD                          )],
+  [8, stack(MELODY,          BASS_SOFT, PAD,        KICK             )],
+  [8, stack(MELODY,          BASS_SOFT, PAD, DRUMS, KICK,      HH, OH)],
+  [8, stack(MELODY_DEG,      BASS_SOFT, PAD, DRUMS, KICK,      HH, OH)],
+  [8, stack(MELODY_DEG,      BASS_SOFT, PAD, DRUMS                   )],
+  [8, stack(MELODY_DEG, ARP, BASS_HARD, PAD, DRUMS, KICK_HARD, HH, OH)],
+  [8, stack(MELODY    , ARP, BASS_HARD, PAD, DRUMS, KICK_HARD, HH, OH)],
+  [4, stack(                            PAD                          )],
+)
