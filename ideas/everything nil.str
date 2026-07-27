@@ -1,0 +1,37 @@
+// @title nil at everything @by lyse
+
+setCpm(120/4)
+setScale("c:minor")
+
+const arp_struct = `<
+  0 - 9 - 4 - 9 4 - 0 - 9 - 4 - 9 4 -
+  -4 - 10 - 5 - 10 5 - -4 - 10 - 5 - 10 5 -
+  -5 - 9 - 4 - 9 4 - -5 - 9 - 4 - 9 4 -
+  -7 - 8 - 3 - 8 3 - -7 - 8 - 3 - 8 3 -
+  -7 - 5 - 0 - 5 0 - -7 - 5 - 0 - 5 0 -
+  -3 - 8 - 3 - 8 3 - -3 - 8 - 3 - 8 3 -
+  -4 - 5 - 0 - 5 0 - -4 - 5 - 0 - 5 0 -
+>*8`
+
+arp : n(arp_struct).sc()
+  .s("supersaw")
+  .detune(.3).unison(1)
+  .pan(rand)
+  .dec(.13)
+  .acidenv(slider(0.313))
+  .delay(.7).delayfb(.8)
+  .diode(1)
+  .fm(slider(0.073)).fmwave("white")
+  .room(slider(0.452)).roomsize(4)
+  .almostNever(x=>x.oct(1))
+
+bass: note("<0>*8").sc().oct(-1)
+  .s("supersaw")
+  .unison(4)
+  .lpf(400)
+  .room("1:4")
+  .diode(1)
+  .o(3)
+
+
+kick: s("sbd!4").duck("3").duckdepth(.7)
