@@ -1,0 +1,47 @@
+// @title anycoop @by lyse
+
+setCpm(170/4)
+setScale("d#:minor")
+
+amb: n("0 0 7 0 11 0 5 <6 4>").sc()
+  .s("supersaw")
+  .rlpf(.7)
+  .acidenv(slider(0.375))
+  .dly(slider(0.804))
+  .flood(1).roomsize(5)
+  .o(3)
+
+arp: n("0 0 7 0 11 0 5 <6 4>").sc()
+  .s("sawtooth")
+  .acidenv(slider(0.5))
+  .dly(slider(0.742))
+  .dec(.20)
+  .diode(1)
+  .fm(slider(0.323)).fmwave("white")
+  ._punchcard({width:1400})
+
+bass: n("<0@3 0@9 <4 [5@3 2]>@4>*4").oct(-2).sc().s("supersaw")
+  .clip(.9)
+  .unison(4).detune(.7)
+  .diode("2:1")
+  .acidenv(slider(0.375))
+  .o(3)
+
+chamb: s("t_pad_dsharpm:2").scrub(rand.seg(16))
+  .dly(slider(0.887))
+  .rlpf(slider(0.702))
+  .hpf(600)
+  .flood(1)
+  .diode("3:.2")
+
+ch: s("t_pad_dsharpm").n("<0 2 2>").scrub(rand.seg(8).rib("<0 0 0 [5 0]>",1))
+  .dly(slider(0.533))
+  .diode(1)
+  ._scope({width:1400})
+
+kick: s("sbd").beat("0,<- - - 6>, 10",16).duck("3:4").duckdepth(.7).duckatt(.2)
+
+g: s("glitch:2").beat("8", 16).dec(.2).delay("<0 0 0 .7>").delayfb(.1).hpf(1200)
+glitch: n(4).sc().s("t_glitch").scrub(irand(16).div(16).seg(8).rib(8,.5)).dec(.2).hpf(1200).pg(.8)
+
+breaks: s("t_breaks").ifit(2).scrub(irand(16).div(16).seg(8)).dec(.2).hpf(1200).pg(.8).o(4)
