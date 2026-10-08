@@ -12,13 +12,14 @@ var chords = `<
 
 PADS: chord(chords).anchor("c4").voicing().s("supersaw")
   .unison(4)
-  // .rlpf(slider(0.829))
-  // .room("1:3")
+  .rlpf(slider(0.572)).lfo({ s: "<0 16>" }, "rlpf_mod")
+  .delay(.7)
+  .room("1:3")
   .o(4)
   ._punchcard({labels:true})
 const arp_lines = `<
   0@2 4 6 0@2 4 6 0@2 4 6 0@2 4 6
-  2@2 4 6 2@2 4 6 2@2 4 6 2@2 4 6
+  2@2 4 6 2@2 4 6 2@2 4 6 2@2 4 <6 6 [6 5]>
   >*8`
 
 arp: n(arp_lines).scale("c:major").s("supersaw")
