@@ -1,0 +1,22 @@
+// @title bebebe @by lyse
+
+// samples('github:kyrsive/minikit-samples')
+
+setCpm(120 / 4)
+setScale("g:minor")
+
+s: n("<5 4 - 0 - - - - 4 6 - - 3 4 - ->*8").sc().s("piano")
+  // .dly(slider(.7))
+  .delay(.7)
+  // .acidenv(slider(1))
+  .diode(1)
+  .room("1")
+
+b: n("<0@4 - -2 -1@2 -2 -1 0@3 - ->*4").sc().oct(-2).s("supersaw")
+  .diode(1)
+  .o(2)
+
+k: s("sbd").beat("0, <- 6>, <- - - 10>, <- - 13>", 16)
+  .duck(2).duckdepth(.2)
+
+c: s("cp").beat("8", 16).pg(.7)
