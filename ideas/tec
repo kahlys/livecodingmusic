@@ -11,12 +11,28 @@ pluck: n(irand(7).rib(12,4)).sc().seg(16).s("wt_glitchcool:16")
   .acidenv(slider(0.449))
   .o(3)
 
-bass: n("<-4@2 -2@2 -1@2 0@2>".add("<0 7>*8")).oct(-1).seg(8).sc().s("supersaw")
+const bass_pattern = ["0", "<0 7>*8"]
+
+bass: n("<-4@2 -2@2 -1@2 0@2>".add(bass_pattern[0])).oct(-1).seg(8).sc().s("supersaw")
   .diode("1:.9")
   .acidenv(slider(.5))
   .room(.3)
   .o(3)
   ._punchcard()
+
+arp: n("<<0 0 0 3>@3 5@3 4@3 9 7>*16").sc().s("sawtooth")
+  .pan(rand)
+  .acidenv(slider(1))
+  .dly(.7)
+  .diode("1:.7")
+  ._punchcard({width: 1200})
+
+mel: n("<0 1 3 5 7 9 11 13 <<12 14> 15>>*16").sc("minor:pentatonic").s("sawtooth")
+  .pan(rand)
+  .acidenv(slider(0.632))
+  .dly(slider(.8))
+  .diode("1:.7")
+  ._punchcard({width: 1200})
 
 lead: s("tec_pad:1").note("c3").scrub(rand.seg(8).rib("<0 0 15>",1))
   .dly(slider(0.478))
@@ -33,7 +49,7 @@ pad: s("tec_pad:0").note("c2").scrub("0@3 0@5".add("<0 .2>"))
   .room(1)
   .o(3)
 
-kick: s("sbd").beat("0,4,8,11,14",16)
+kick: s("sbd").beat("0,4,8,<-@3 11>,<12@3 ->,<-@3 14>",16)
   .duck("3:4:5").duckdepth(.7)
 
-top: s("hat_loops:2").ifit(2).diode("1:.3").rlpf(.8).pg(.8)
+top: s("hat_loops:2").ifit(2).diode("1:.3").rlpf(.8).pg(1)
