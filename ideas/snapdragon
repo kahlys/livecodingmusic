@@ -1,0 +1,25 @@
+// @title snapdragon @by lyse
+
+setCpm(90/4)
+setScale("a:minor")
+
+kick: s("sbd!4").duck("3:4:5").duckatt(.2)
+
+sd: s("- sd:4 - sd:4").gain(.5)
+
+bass: n("<0 7 0 7 0 7 0 7 9 7>*16").sc().oct(-2)
+  .s("supersaw")
+  .unison(5)
+  .acidenv(1)
+  .diode(1)
+  .o(3)
+
+chords: chord("<Am F Dm@2>").voicing().s("sawtooth")
+  .acidenv(.7)
+  .gain(.5)
+  .o(4)
+
+lay: n("<0 -2 -4 [3@3 2 1]>").sc().s("supersaw")
+  .oct(-1)
+  .diode(1)
+  .o(3)
